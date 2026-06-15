@@ -9,7 +9,15 @@ Cargo.lock
 *.swo
 .DS_Store
 
-# wow compiler output
-*.c.out
-*.js.out
-*.ino.out
+# wow compiler output — generated next to .wow source files when building examples.
+# The real runtime sources live in runtime/auzaar/ and are NOT ignored.
+examples/*.c
+examples/*.js
+examples/*.ino
+examples/auzaar.h
+examples/auzaar.js
+# compiled example binaries (no extension)
+examples/salam
+examples/blink
+examples/server
+examples/pahara

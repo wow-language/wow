@@ -96,11 +96,15 @@ pub enum Node {
     /// koshish { ... } pakdo ghalti { ... }
     Koshish {
         body: Vec<Spanned<Node>>,
+        // consumed once error handling lands on a backend (later phase)
+        #[allow(dead_code)]
         catch_var: Option<String>,
         catch_body: Vec<Spanned<Node>>,
     },
 
     /// lao naam from "path"
+    // consumed once `lao` imports land on the Node backend (later phase)
+    #[allow(dead_code)]
     Lao {
         name: String,
         path: String,
@@ -126,6 +130,9 @@ pub enum Node {
     /// unary: nahi expr
     UnaryNot(Box<Spanned<Node>>),
 
+    /// unary minus: -expr
+    Negate(Box<Spanned<Node>>),
+
     /// expr phir fn phir fn ...
     Phir {
         value: Box<Spanned<Node>>,
@@ -140,6 +147,8 @@ pub enum Node {
     },
 
     /// safe access: user?.profile?.naam
+    // consumed once safe access lands on a backend (later phase)
+    #[allow(dead_code)]
     SafeAccess {
         parts: Vec<String>,
     },
@@ -161,7 +170,10 @@ pub enum Node {
     Server(Box<Spanned<Node>>),
     /// rasta GET "/path" { }
     Rasta {
+        // method + path are consumed once routes land on the Node backend (later phase)
+        #[allow(dead_code)]
         method: HttpMethod,
+        #[allow(dead_code)]
         path: String,
         body: Vec<Spanned<Node>>,
     },

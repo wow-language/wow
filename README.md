@@ -207,9 +207,49 @@ Ghalti: 'agar' ke baad condition chahiye
 
 ---
 
+## Try it
+
+```bash
+# build the compiler
+cargo build
+
+# run a program (defaults to the C target; needs gcc)
+./target/debug/wow run examples/pahara.wow
+
+# same source, JavaScript target (needs node)
+./target/debug/wow run examples/pahara.wow --target node
+
+# just emit the generated code without running it
+./target/debug/wow build examples/salam.wow            # -> examples/salam.c
+./target/debug/wow build examples/salam.wow --target node  # -> examples/salam.js
+```
+
 ## Project status
 
-Early development. Phase 1 in progress: core language and C backend.
+Phase 1 is working: the **core language runs on both the C and Node.js targets
+from the same source file**, with identical output.
+
+What works today:
+
+- Variables, `bol`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
+- `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
+- Loops: `har i 0 se 10 tak`, `har item mein list`, `N baar`, `jabtak`, with `roko` / `aage`
+- `kaam` / `do` functions with default parameters and recursion
+- Lists, `pucho` (input), and a good slice of the `auzaar` toolbox
+- `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
+- Clear, pointed compile errors in Roman Urdu
+
+Coming next, per [the plan](docs): the Arduino target (`shuru` / `chalao` / pins),
+the web keywords (`server` / `rasta` / `jawab` / `lao`), and `koshish` / `pakdo`.
+Using one of those today produces a friendly "not on this target yet" error.
+
+A couple of design notes for the curious:
+
+- Ranges are **inclusive**: `har i 1 se 5 tak` runs for 1, 2, 3, 4, 5.
+- Inside string interpolation, a `{...}` hole can hold any expression, but not a
+  string literal using the same quotes — write `umar = "{saal}"` ahead of time.
+- The parser is hand-written (not a combinator library) so the Roman Urdu error
+  messages stay precise; see the note in `Cargo.toml`.
 
 See [docs/keywords.md](docs/keywords.md) for the full keyword reference and [docs/auzaar.md](docs/auzaar.md) for the toolbox reference.
 

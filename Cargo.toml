@@ -15,11 +15,13 @@ path = "src/main.rs"
 # Lexer: define tokens as an annotated enum, very fast
 logos = "0.14"
 
-# Parser: combinator-based, lets us describe the grammar clearly
-chumsky = "0.9"
-
 # Error messages: pointed, coloured, with source spans
 ariadne = "0.4"
 
 # CLI: wow build <file> --target <c|arduino|node>
 clap = { version = "4", features = ["derive"] }
+
+# Note: the parser is a hand-written recursive-descent parser (see src/parser.rs).
+# wow's grammar is newline-significant and reuses keywords (agar/warna also form
+# the ternary), which is fiddly in parser combinators. Hand-rolling gives precise
+# control over the Roman Urdu error messages, which are the heart of the language.
