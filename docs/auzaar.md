@@ -1,0 +1,77 @@
+# auzaar — the wow built-in toolbox
+
+`auzaar` is wow's standard utility library, inspired by lodash. It is auto-loaded
+in every wow program. You never write `lao auzaar`. These functions are simply
+always available.
+
+## Naming rule
+
+A function name should plainly say what it does in Urdu. We do not pick a word
+for a clever sound or a pun. When there is no clear everyday Urdu word, we use
+the plain English name, because most kids already learn these terms in math class.
+
+## Target support
+
+| Target | Support level |
+|---|---|
+| Node | Full — the complete set |
+| C | Most — backed by a bundled C runtime; collection tools use a dynamic-array type |
+| Arduino | Light — math and simple string helpers only; collection tools are too heavy for board memory |
+
+Using an unavailable function on a target produces a clear Roman Urdu compile error.
+
+---
+
+## Collections
+
+All collection tools take the list as their first argument so they work cleanly with `phir`.
+
+| Function | Does what |
+|---|---|
+| `badlo(list, fn)` | transform every item (map) |
+| `chuno(list, fn)` | keep items that pass a test (filter) |
+| `joro(list, fn, start)` | combine all items into one value (reduce) |
+| `dhundo(list, fn)` | first item that matches a test (find) |
+| `shamil(list, item)` | is the item present (includes) |
+| `ginti(list)` | count of items |
+| `jama(list)` | sum of all numbers |
+| `max(list)` | largest value |
+| `min(list)` | smallest value |
+| `tarteeb(list)` | sort in ascending order |
+| `tarteeb(list, fn)` | sort by a custom function |
+| `ulta(list)` | reverse order |
+| `alag(list)` | remove duplicate values |
+| `flatten(list)` | flatten nested lists |
+| `tukre(list, n)` | split into chunks of size n |
+| `pehla(list)` | first item |
+| `aakhri(list)` | last item |
+| `phento(list)` | shuffle into random order |
+| `guroh(list, fn)` | group items by a key |
+| `silsila(start, end)` | generate a list of numbers from start to end |
+
+## Strings
+
+| Function | Does what |
+|---|---|
+| `toro(text, sep)` | split a string into a list |
+| `milao(list, sep)` | join a list of strings into one string |
+| `saaf(text)` | trim whitespace from both ends |
+| `tabdeel(text, old, new)` | replace all occurrences |
+| `lambai(text)` | length of a string |
+| `bara_likho(text)` | convert to uppercase |
+| `chota_likho(text)` | convert to lowercase |
+
+## Math
+
+Plain English names are used here because kids already know these from math class.
+
+| Function | Does what |
+|---|---|
+| `random()` | random decimal number between 0 and 1 |
+| `random_number(min, max)` | random whole number between min and max |
+| `round(n)` | round to the nearest whole number |
+| `round_up(n)` | round up to next whole number (ceiling) |
+| `round_down(n)` | round down to previous whole number (floor) |
+| `square_root(n)` | square root of n |
+| `power(n, p)` | n raised to the power of p |
+| `absolute(n)` | absolute value (remove the negative sign) |

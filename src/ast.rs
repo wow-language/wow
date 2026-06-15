@@ -1,0 +1,238 @@
+/// A span records where in the source file a node came from.
+/// Used by ariadne to point at the right place in error messages.
+pub type Span = std::ops::Range<usize>;
+
+/// Every piece of a wow program is one of these nodes.
+/// The backends each walk this tree and emit their target language.
+#[derive(Debug, Clone)]
+pub enum Node {
+    // ----------------------------------------------------------------
+    // Top level
+    // ----------------------------------------------------------------
+
+    /// The whole program: a list of top-level statements
+    Program(Vec<Spanned<Node>>),
+
+    // ----------------------------------------------------------------
+    // Literals
+    // ----------------------------------------------------------------
+
+    Number(f64),
+    Str(String),
+    /// String with {interpolation} holes: list of either raw text or an expression
+    Interpolated(Vec<InterpolPart>),
+    Bool(bool),    // sahi / ghalat
+    Null,          // khali
+    Identifier(String),
+    List(Vec<Spanned<Node>>),
+
+    // ----------------------------------------------------------------
+    // Statements
+    // ----------------------------------------------------------------
+
+    /// x = expr  or  rakho x = expr
+    Assign {
+        name: String,
+        value: Box<Spanned<Node>>,
+    },
+
+    /// bol expr
+    Bol(Box<Spanned<Node>>),
+
+    /// pucho "..."  — returns what the user typed
+    Pucho(Box<Spanned<Node>>),
+
+    /// agar cond { ... } warna agar cond { ... } warna { ... }
+    Agar {
+        condition: Box<Spanned<Node>>,
+        then_body: Vec<Spanned<Node>>,
+        else_ifs: Vec<(Spanned<Node>, Vec<Spanned<Node>>)>,
+        else_body: Option<Vec<Spanned<Node>>>,
+    },
+
+    /// har i 0 se 10 tak { ... }
+    HarRange {
+        var: String,
+        from: Box<Spanned<Node>>,
+        to: Box<Spanned<Node>>,
+        body: Vec<Spanned<Node>>,
+    },
+
+    /// har item mein lista { ... }
+    HarList {
+        var: String,
+        list: Box<Spanned<Node>>,
+        body: Vec<Spanned<Node>>,
+    },
+
+    /// 3 baar { ... }
+    Baar {
+        times: Box<Spanned<Node>>,
+        body: Vec<Spanned<Node>>,
+    },
+
+    /// jabtak condition { ... }
+    Jabtak {
+        condition: Box<Spanned<Node>>,
+        body: Vec<Spanned<Node>>,
+    },
+
+    /// roko — break
+    Roko,
+
+    /// aage — continue
+    Aage,
+
+    /// kaam naam(param, param = default) { ... }
+    Kaam {
+        naam: String,
+        params: Vec<Param>,
+        body: Vec<Spanned<Node>>,
+    },
+
+    /// do expr — return
+    Do(Box<Spanned<Node>>),
+
+    /// koshish { ... } pakdo ghalti { ... }
+    Koshish {
+        body: Vec<Spanned<Node>>,
+        catch_var: Option<String>,
+        catch_body: Vec<Spanned<Node>>,
+    },
+
+    /// lao naam from "path"
+    Lao {
+        name: String,
+        path: String,
+    },
+
+    // ----------------------------------------------------------------
+    // Expressions
+    // ----------------------------------------------------------------
+
+    /// function call: naam(args)
+    Call {
+        name: String,
+        args: Vec<Spanned<Node>>,
+    },
+
+    /// binary operation: left op right
+    BinOp {
+        op: BinOp,
+        left: Box<Spanned<Node>>,
+        right: Box<Spanned<Node>>,
+    },
+
+    /// unary: nahi expr
+    UnaryNot(Box<Spanned<Node>>),
+
+    /// expr phir fn phir fn ...
+    Phir {
+        value: Box<Spanned<Node>>,
+        calls: Vec<PhirStep>,
+    },
+
+    /// "bara" agar x > 5 warna "chota"
+    Ternary {
+        condition: Box<Spanned<Node>>,
+        then_val: Box<Spanned<Node>>,
+        else_val: Box<Spanned<Node>>,
+    },
+
+    /// safe access: user?.profile?.naam
+    SafeAccess {
+        parts: Vec<String>,
+    },
+
+    // ----------------------------------------------------------------
+    // Arduino-specific
+    // ----------------------------------------------------------------
+
+    /// kaam shuru() { }
+    ArduinoShuru(Vec<Spanned<Node>>),
+    /// kaam chalao() { }
+    ArduinoChalao(Vec<Spanned<Node>>),
+
+    // ----------------------------------------------------------------
+    // Node/web-specific
+    // ----------------------------------------------------------------
+
+    /// server(port)
+    Server(Box<Spanned<Node>>),
+    /// rasta GET "/path" { }
+    Rasta {
+        method: HttpMethod,
+        path: String,
+        body: Vec<Spanned<Node>>,
+    },
+    /// jawab expr
+    Jawab(Box<Spanned<Node>>),
+}
+
+// ----------------------------------------------------------------
+// Supporting types
+// ----------------------------------------------------------------
+
+/// A node paired with its source location
+#[derive(Debug, Clone)]
+pub struct Spanned<T> {
+    pub node: T,
+    pub span: Span,
+}
+
+impl<T> Spanned<T> {
+    pub fn new(node: T, span: Span) -> Self {
+        Self { node, span }
+    }
+}
+
+/// One step in a phir chain
+#[derive(Debug, Clone)]
+pub struct PhirStep {
+    pub name: String,
+    pub args: Vec<Spanned<Node>>,
+    pub span: Span,
+}
+
+/// A function parameter, optionally with a default value
+#[derive(Debug, Clone)]
+pub struct Param {
+    pub name: String,
+    pub default: Option<Box<Spanned<Node>>>,
+}
+
+/// One part of an interpolated string
+#[derive(Debug, Clone)]
+pub enum InterpolPart {
+    /// Raw text: "Salam "
+    Text(String),
+    /// Expression in braces: {naam}
+    Expr(Box<Spanned<Node>>),
+}
+
+/// Binary operators
+#[derive(Debug, Clone, PartialEq)]
+pub enum BinOp {
+    Add,     // +
+    Sub,     // -
+    Mul,     // *
+    Div,     // /
+    Mod,     // %
+    Eq,      // ==
+    NotEq,   // !=
+    Lt,      // <
+    Lte,     // <=
+    Gt,      // >
+    Gte,     // >=
+    And,     // aur
+    Or,      // ya
+}
+
+/// HTTP methods for rasta
+#[derive(Debug, Clone)]
+pub enum HttpMethod {
+    Get,
+    Post,
+    Put,
+    Delete,
+}

@@ -1,0 +1,15 @@
+# blink.wow — blink the built-in LED on pin 13
+# Flash with: wow build blink.wow --target arduino
+
+LED = 13
+
+kaam shuru() {
+    pin_set(LED, output)
+}
+
+kaam chalao() {
+    pin_likho(LED, on)
+    intezar(1000)
+    pin_likho(LED, off)
+    intezar(1000)
+}

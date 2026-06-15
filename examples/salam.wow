@@ -1,0 +1,15 @@
+# salam.wow — hello world in wow
+# Run with: wow build salam.wow
+
+naam = pucho "Apna naam likho: "
+
+bol "Salam {naam}! wow mein khush aamdeed."
+
+numbers = [1, 5, 3, 8, 2, 9]
+
+bade = numbers phir chuno(x > 4) phir tarteeb
+
+bol "4 se bade numbers:"
+har n mein bade {
+    bol "  {n}"
+}

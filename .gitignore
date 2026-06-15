@@ -1,0 +1,15 @@
+# Rust build artifacts
+/target
+Cargo.lock
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# wow compiler output
+*.c.out
+*.js.out
+*.ino.out
