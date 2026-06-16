@@ -83,17 +83,17 @@ pub enum Node {
     /// aage — continue
     Aage,
 
-    /// kaam naam(param, param = default) { ... }
-    Kaam {
+    /// banao naam(param, param = default) { ... }
+    Banao {
         naam: String,
         params: Vec<Param>,
         body: Vec<Spanned<Node>>,
     },
 
     /// do expr — return
-    Do(Box<Spanned<Node>>),
+    Bhejo(Box<Spanned<Node>>),
 
-    /// koshish { ... } pakdo ghalti { ... }
+    /// koshish { ... } pakro ghalti { ... }
     Koshish {
         body: Vec<Spanned<Node>>,
         // consumed once error handling lands on a backend (later phase)
@@ -157,9 +157,9 @@ pub enum Node {
     // Arduino-specific
     // ----------------------------------------------------------------
 
-    /// kaam shuru() { }
+    /// banao shuru() { }
     ArduinoShuru(Vec<Spanned<Node>>),
-    /// kaam chalao() { }
+    /// banao chalao() { }
     ArduinoChalao(Vec<Spanned<Node>>),
 
     // ----------------------------------------------------------------

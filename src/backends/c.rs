@@ -21,7 +21,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     // Pass 1: record every user function's signature so call sites can pad
     // missing arguments with their default values.
     for stmt in stmts {
-        if let Node::Kaam { naam, params, .. } = &stmt.node {
+        if let Node::Banao { naam, params, .. } = &stmt.node {
             g.funcs.insert(naam.clone(), params.clone());
         }
     }
@@ -33,7 +33,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
 
     for stmt in stmts {
         match &stmt.node {
-            Node::Kaam { naam, params, body } => {
+            Node::Banao { naam, params, body } => {
                 func_defs.push_str(&g.gen_function(naam, params, body));
             }
             // Top-level statements run inside main().
@@ -124,7 +124,7 @@ impl CGen {
         for stmt in body {
             sig.push_str(&self.gen_stmt(stmt, 1));
         }
-        // A function with no explicit `do` still returns a value.
+        // A function with no explicit `bhejo` still returns a value.
         sig.push_str("    return wow_null();\n}\n\n");
         sig
     }
@@ -142,7 +142,7 @@ impl CGen {
             Node::Bol(e) => format!("{pad}wow_print({});\n", self.gen_expr(e)),
             // Returning/breaking out of a koshish body must unwind the handler
             // stack first; _hbase is the function's level, the loop var the loop's.
-            Node::Do(e) => {
+            Node::Bhejo(e) => {
                 let val = self.gen_expr(e);
                 if self.uses_koshish {
                     // evaluate first (it may raise into an active koshish), then
@@ -490,7 +490,7 @@ fn collect_assigns(node: &Spanned<Node>, names: &mut BTreeSet<String>) {
 fn uses_koshish(node: &Spanned<Node>) -> bool {
     match &node.node {
         Node::Koshish { .. } => true,
-        Node::Kaam { body, .. }
+        Node::Banao { body, .. }
         | Node::HarRange { body, .. }
         | Node::HarList { body, .. }
         | Node::Baar { body, .. }

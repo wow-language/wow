@@ -9,7 +9,7 @@ use std::collections::BTreeSet;
 /// hardware-call boundary). The checker rejects the memory-heavy parts of wow
 /// (lists, collection tools, `pucho`) before we ever get here.
 ///
-/// wow maps `kaam shuru()` -> `setup()` and `kaam chalao()` -> `loop()`.
+/// wow maps `banao shuru()` -> `setup()` and `banao chalao()` -> `loop()`.
 pub fn generate(ast: &Spanned<Node>) -> String {
     let stmts = match &ast.node {
         Node::Program(s) => s,
@@ -26,7 +26,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     for stmt in stmts {
         match &stmt.node {
             Node::Assign { name, value } => globals.push((name, value)),
-            Node::Kaam { naam, params, body } => funcs.push((naam, params, body)),
+            Node::Banao { naam, params, body } => funcs.push((naam, params, body)),
             Node::ArduinoShuru(body) => shuru = Some(body),
             Node::ArduinoChalao(body) => chalao = Some(body),
             _ => {} // the checker has already rejected anything else at top level
@@ -131,7 +131,7 @@ fn gen_stmt(node: &Spanned<Node>, depth: usize) -> String {
     match &node.node {
         Node::Assign { name, value } => format!("{pad}v_{name} = {};\n", gen_expr(value)),
         Node::Bol(e) => format!("{pad}wow_print({});\n", gen_expr(e)),
-        Node::Do(e) => format!("{pad}return {};\n", gen_expr(e)),
+        Node::Bhejo(e) => format!("{pad}return {};\n", gen_expr(e)),
         Node::Roko => format!("{pad}break;\n"),
         Node::Aage => format!("{pad}continue;\n"),
 
@@ -384,7 +384,7 @@ fn collect_assigns(node: &Spanned<Node>, names: &mut BTreeSet<String>) {
 fn uses_bol_in(node: &Spanned<Node>) -> bool {
     match &node.node {
         Node::Bol(_) => true,
-        Node::ArduinoShuru(body) | Node::ArduinoChalao(body) | Node::Kaam { body, .. } => {
+        Node::ArduinoShuru(body) | Node::ArduinoChalao(body) | Node::Banao { body, .. } => {
             body.iter().any(uses_bol_in)
         }
         Node::Agar { then_body, else_ifs, else_body, .. } => {

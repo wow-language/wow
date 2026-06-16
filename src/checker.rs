@@ -62,7 +62,7 @@ fn walk(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>) {
 
         Node::Assign { value, .. } => walk(value, target, errors),
         Node::Bol(e)
-        | Node::Do(e)
+        | Node::Bhejo(e)
         | Node::Jawab(e)
         | Node::Pucho(e)
         | Node::Negate(e)
@@ -97,7 +97,7 @@ fn walk(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>) {
             walk(condition, target, errors);
             walk_all(body, target, errors);
         }
-        Node::Kaam { params, body, .. } => {
+        Node::Banao { params, body, .. } => {
             for p in params {
                 if let Some(def) = &p.default {
                     walk(def, target, errors);
@@ -162,7 +162,7 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
             Node::ArduinoShuru(_) | Node::ArduinoChalao(_) => flag(
                 errors, span,
                 "Ye sirf Arduino ke liye hai",
-                "kaam shuru() / chalao() sirf Arduino par chalte hain",
+                "banao shuru() / chalao() sirf Arduino par chalte hain",
                 "is file ko --target arduino ke saath chalayein",
             ),
             Node::Call { name, .. } if is_arduino_call(name) => flag(
@@ -226,7 +226,7 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
             ),
             Node::Koshish { .. } => flag(
                 errors, span,
-                "Arduino par 'koshish/pakdo' nahi",
+                "Arduino par 'koshish/pakro' nahi",
                 "error handling abhi Arduino par nahi",
                 "agle phase mein aayega",
             ),
@@ -239,14 +239,14 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
             _ => {}
         },
 
-        // On Node, `kaam shuru()` is allowed — it's just startup code. But
+        // On Node, `banao shuru()` is allowed — it's just startup code. But
         // `chalao()` (an Arduino loop) has no meaning here.
         Target::Node => match &node.node {
             Node::ArduinoChalao(_) => flag(
                 errors, span,
                 "Node par 'chalao' nahi",
                 "chalao() (loop) sirf Arduino par chalta hai",
-                "Node par startup ke liye 'kaam shuru()' istemaal karein",
+                "Node par startup ke liye 'banao shuru()' istemaal karein",
             ),
             Node::Call { name, .. } if is_arduino_call(name) => flag(
                 errors, span,
@@ -276,15 +276,15 @@ fn is_collection_tool(name: &str) -> bool {
     )
 }
 
-/// On Arduino, executable code must live inside `kaam shuru()` / `kaam chalao()`
-/// (or a helper `kaam`). Only variable declarations and function definitions are
+/// On Arduino, executable code must live inside `banao shuru()` / `banao chalao()`
+/// (or a helper `banao`). Only variable declarations and function definitions are
 /// allowed at the top level, mirroring how an .ino sketch is structured.
 fn check_arduino_toplevel(ast: &Spanned<Node>, errors: &mut Vec<Violation>) {
     let Node::Program(stmts) = &ast.node else { return };
     for stmt in stmts {
         match &stmt.node {
             Node::Assign { .. }
-            | Node::Kaam { .. }
+            | Node::Banao { .. }
             | Node::ArduinoShuru(_)
             | Node::ArduinoChalao(_) => {}
             _ => flag(
@@ -292,7 +292,7 @@ fn check_arduino_toplevel(ast: &Spanned<Node>, errors: &mut Vec<Violation>) {
                 &stmt.span,
                 "Arduino par code yahan nahi chal sakta",
                 "ye line kisi kaam ke bahar hai",
-                "isay 'kaam shuru() { ... }' ya 'kaam chalao() { ... }' ke andar likhein",
+                "isay 'banao shuru() { ... }' ya 'banao chalao() { ... }' ke andar likhein",
             ),
         }
     }
