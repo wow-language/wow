@@ -177,12 +177,6 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
                 "library import abhi desktop (C) par nahi",
                 "abhi --target node istemaal karein",
             ),
-            Node::Koshish { .. } => flag(
-                errors, span,
-                "'koshish/pakdo' abhi C par nahi",
-                "error handling abhi desktop (C) par nahi aaya",
-                "agle phase mein aayega",
-            ),
             Node::SafeAccess { .. } => flag(
                 errors, span,
                 "'?.' abhi C par nahi",
@@ -245,12 +239,14 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
             _ => {}
         },
 
+        // On Node, `kaam shuru()` is allowed — it's just startup code. But
+        // `chalao()` (an Arduino loop) has no meaning here.
         Target::Node => match &node.node {
-            Node::ArduinoShuru(_) | Node::ArduinoChalao(_) => flag(
+            Node::ArduinoChalao(_) => flag(
                 errors, span,
-                "Ye sirf Arduino ke liye hai",
-                "shuru() / chalao() sirf Arduino par chalte hain",
-                "is file ko --target arduino ke saath chalayein",
+                "Node par 'chalao' nahi",
+                "chalao() (loop) sirf Arduino par chalta hai",
+                "Node par startup ke liye 'kaam shuru()' istemaal karein",
             ),
             Node::Call { name, .. } if is_arduino_call(name) => flag(
                 errors, span,

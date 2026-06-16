@@ -59,6 +59,17 @@ const intezar = (ms) => {
     while (Date.now() < end) { /* spin */ }
 };
 
+// division / modulo that raise on a zero divisor, so koshish can catch it
+// (and so the error matches the C target instead of giving Infinity / NaN)
+const taqseem = (a, b) => {
+    if (Number(b) === 0) throw new Error("sifr se taqseem nahi ho sakta");
+    return a / b;
+};
+const baaqi = (a, b) => {
+    if (Number(b) === 0) throw new Error("sifr se taqseem nahi ho sakta");
+    return a % b;
+};
+
 // ----------------------------------------------------------------
 // Collections
 // ----------------------------------------------------------------
@@ -141,7 +152,7 @@ const absolute      = (n) => Math.abs(n);
 
 module.exports = {
     // runtime core
-    fmt, bol, pucho, truthy, intezar,
+    fmt, bol, pucho, truthy, intezar, taqseem, baaqi,
     // collections
     badlo, chuno, joro, dhundo, shamil, ginti, jama, max, min,
     tarteeb, ulta, alag, flatten, tukre, pehla, aakhri, phento,

@@ -16,6 +16,8 @@ pub fn generate(ast: &Spanned<Node>) -> String {
         _ => return String::new(),
     };
 
+    g.uses_koshish = stmts.iter().any(uses_koshish);
+
     // Pass 1: record every user function's signature so call sites can pad
     // missing arguments with their default values.
     for stmt in stmts {
@@ -64,6 +66,9 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     out.push_str("int main(void) {\n");
     out.push_str("    srand((unsigned)time(NULL));\n");
     out.push_str(&declare_locals(stmts, &[], 1));
+    if g.uses_koshish {
+        out.push_str("    int _hbase = wow_handler_top;\n");
+    }
     out.push_str(&main_body);
     out.push_str("    return 0;\n}\n");
 
@@ -77,11 +82,17 @@ struct CGen {
     lifted: Vec<String>,
     /// counter for generating unique temp / lambda names
     tmp: usize,
+    /// does the program use koshish? (gates the error-handler bookkeeping so
+    /// ordinary programs stay clean)
+    uses_koshish: bool,
+    /// handler-stack variable for each enclosing loop, so roko/aage can unwind
+    /// any koshish opened inside the loop body
+    loop_stack: Vec<String>,
 }
 
 impl CGen {
     fn new() -> Self {
-        CGen { funcs: HashMap::new(), lifted: Vec::new(), tmp: 0 }
+        CGen { funcs: HashMap::new(), lifted: Vec::new(), tmp: 0, uses_koshish: false, loop_stack: Vec::new() }
     }
 
     fn fresh(&mut self) -> usize {
@@ -107,6 +118,9 @@ impl CGen {
         sig.push_str(") {\n");
 
         sig.push_str(&declare_locals(body, &param_names, 1));
+        if self.uses_koshish {
+            sig.push_str("    int _hbase = wow_handler_top;\n");
+        }
         for stmt in body {
             sig.push_str(&self.gen_stmt(stmt, 1));
         }
@@ -126,9 +140,20 @@ impl CGen {
                 format!("{pad}v_{name} = {};\n", self.gen_expr(value))
             }
             Node::Bol(e) => format!("{pad}wow_print({});\n", self.gen_expr(e)),
-            Node::Do(e) => format!("{pad}return {};\n", self.gen_expr(e)),
-            Node::Roko => format!("{pad}break;\n"),
-            Node::Aage => format!("{pad}continue;\n"),
+            // Returning/breaking out of a koshish body must unwind the handler
+            // stack first; _hbase is the function's level, the loop var the loop's.
+            Node::Do(e) => {
+                let val = self.gen_expr(e);
+                if self.uses_koshish {
+                    // evaluate first (it may raise into an active koshish), then
+                    // unwind the handler stack to this function's base and return
+                    format!("{pad}{{ WowValue _ret = {val}; wow_handler_top = _hbase; return _ret; }}\n")
+                } else {
+                    format!("{pad}return {val};\n")
+                }
+            }
+            Node::Roko => self.loop_exit(&pad, "break"),
+            Node::Aage => self.loop_exit(&pad, "continue"),
 
             Node::Agar { condition, then_body, else_ifs, else_body } => {
                 let mut s = format!("{pad}if (wow_truthy({})) {{\n", self.gen_expr(condition));
@@ -150,6 +175,7 @@ impl CGen {
                 let from_c = self.gen_expr(from);
                 let to_c = self.gen_expr(to);
                 let mut s = format!("{pad}{{\n");
+                s.push_str(&self.loop_enter(&pad, i));
                 // `0 se 10 tak` counts inclusively: 0,1,...,10
                 s.push_str(&format!("{pad}    double _to{i} = wow_as_num({to_c});\n"));
                 s.push_str(&format!(
@@ -158,6 +184,7 @@ impl CGen {
                 s.push_str(&format!("{pad}        WowValue v_{var} = wow_num(_k{i});\n"));
                 s.push_str(&self.gen_body(body, depth + 2));
                 s.push_str(&format!("{pad}    }}\n{pad}}}\n"));
+                self.loop_leave();
                 s
             }
 
@@ -165,6 +192,7 @@ impl CGen {
                 let i = self.fresh();
                 let list_c = self.gen_expr(list);
                 let mut s = format!("{pad}{{\n");
+                s.push_str(&self.loop_enter(&pad, i));
                 s.push_str(&format!("{pad}    WowValue _lst{i} = {list_c};\n"));
                 s.push_str(&format!(
                     "{pad}    for (int _i{i} = 0; _i{i} < wow_count(_lst{i}); _i{i}++) {{\n"
@@ -172,6 +200,7 @@ impl CGen {
                 s.push_str(&format!("{pad}        WowValue v_{var} = wow_at(_lst{i}, _i{i});\n"));
                 s.push_str(&self.gen_body(body, depth + 2));
                 s.push_str(&format!("{pad}    }}\n{pad}}}\n"));
+                self.loop_leave();
                 s
             }
 
@@ -179,17 +208,42 @@ impl CGen {
                 let i = self.fresh();
                 let times_c = self.gen_expr(times);
                 let mut s = format!("{pad}{{\n");
+                s.push_str(&self.loop_enter(&pad, i));
                 s.push_str(&format!("{pad}    double _n{i} = wow_as_num({times_c});\n"));
                 s.push_str(&format!("{pad}    for (double _k{i} = 0; _k{i} < _n{i}; _k{i} += 1) {{\n"));
                 s.push_str(&self.gen_body(body, depth + 2));
                 s.push_str(&format!("{pad}    }}\n{pad}}}\n"));
+                self.loop_leave();
                 s
             }
 
             Node::Jabtak { condition, body } => {
-                let mut s = format!("{pad}while (wow_truthy({})) {{\n", self.gen_expr(condition));
-                s.push_str(&self.gen_body(body, depth + 1));
-                s.push_str(&format!("{pad}}}\n"));
+                let i = self.fresh();
+                let cond_c = self.gen_expr(condition);
+                let mut s = format!("{pad}{{\n");
+                s.push_str(&self.loop_enter(&pad, i));
+                s.push_str(&format!("{pad}    while (wow_truthy({cond_c})) {{\n"));
+                s.push_str(&self.gen_body(body, depth + 2));
+                s.push_str(&format!("{pad}    }}\n{pad}}}\n"));
+                self.loop_leave();
+                s
+            }
+
+            Node::Koshish { body, catch_var, catch_body } => {
+                let i = self.fresh();
+                let mut s = format!("{pad}{{\n");
+                s.push_str(&format!("{pad}    int _h{i} = wow_handler_top;\n"));
+                s.push_str(&format!("{pad}    wow_handler_top = _h{i} + 1;\n"));
+                s.push_str(&format!("{pad}    if (setjmp(wow_handlers[_h{i}]) == 0) {{\n"));
+                s.push_str(&self.gen_body(body, depth + 2));
+                s.push_str(&format!("{pad}        wow_handler_top = _h{i};\n"));
+                s.push_str(&format!("{pad}    }} else {{\n"));
+                s.push_str(&format!("{pad}        wow_handler_top = _h{i};\n"));
+                if let Some(var) = catch_var {
+                    s.push_str(&format!("{pad}        WowValue v_{var} = wow_str(wow_error_msg);\n"));
+                }
+                s.push_str(&self.gen_body(catch_body, depth + 2));
+                s.push_str(&format!("{pad}    }}\n{pad}}}\n"));
                 s
             }
 
@@ -204,6 +258,32 @@ impl CGen {
             s.push_str(&self.gen_stmt(stmt, depth));
         }
         s
+    }
+
+    /// Record the handler level at a loop's start so roko/aage can unwind any
+    /// koshish opened inside it. No-op unless the program uses koshish.
+    fn loop_enter(&mut self, pad: &str, i: usize) -> String {
+        if !self.uses_koshish {
+            return String::new();
+        }
+        self.loop_stack.push(format!("_hl{i}"));
+        format!("{pad}    int _hl{i} = wow_handler_top;\n")
+    }
+
+    fn loop_leave(&mut self) {
+        if self.uses_koshish {
+            self.loop_stack.pop();
+        }
+    }
+
+    /// `break` / `continue`, restoring the handler stack to the loop's level.
+    fn loop_exit(&self, pad: &str, kw: &str) -> String {
+        if self.uses_koshish {
+            if let Some(h) = self.loop_stack.last() {
+                return format!("{pad}wow_handler_top = {h}; {kw};\n");
+            }
+        }
+        format!("{pad}{kw};\n")
     }
 
     // ----------------------------------------------------------------
@@ -394,7 +474,33 @@ fn collect_assigns(node: &Spanned<Node>, names: &mut BTreeSet<String>) {
                 collect_assigns(s, names);
             }
         }
+        Node::Koshish { body, catch_body, .. } => {
+            for s in body {
+                collect_assigns(s, names);
+            }
+            for s in catch_body {
+                collect_assigns(s, names);
+            }
+        }
         _ => {}
+    }
+}
+
+/// Does this subtree contain a koshish? Gates the handler-stack bookkeeping.
+fn uses_koshish(node: &Spanned<Node>) -> bool {
+    match &node.node {
+        Node::Koshish { .. } => true,
+        Node::Kaam { body, .. }
+        | Node::HarRange { body, .. }
+        | Node::HarList { body, .. }
+        | Node::Baar { body, .. }
+        | Node::Jabtak { body, .. } => body.iter().any(uses_koshish),
+        Node::Agar { then_body, else_ifs, else_body, .. } => {
+            then_body.iter().any(uses_koshish)
+                || else_ifs.iter().any(|(_, b)| b.iter().any(uses_koshish))
+                || else_body.as_ref().map_or(false, |b| b.iter().any(uses_koshish))
+        }
+        _ => false,
     }
 }
 

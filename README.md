@@ -176,8 +176,31 @@ rasta GET "/" {
 
 Run it:
 ```bash
-wow build server.wow --target node
+wow build examples/server.wow --target node   # -> examples/server.js
+cd examples && npm install express            # one-time, for the web target
+node server.js                                # open http://localhost:3000
 ```
+
+`rasta` registers a route, `jawab` sends the reply, and `server(port)` starts
+listening — the Express app is wired up for you, so there's no `app = express()`
+or `(req, res)` to write. `kaam shuru()` holds code that runs at startup.
+
+---
+
+## Catching mistakes with `koshish` / `pakdo`
+
+```wow
+koshish {
+    natija = 10 / 0
+    bol natija
+} pakdo ghalti {
+    bol "Ghalti pakdi: {ghalti}"
+}
+```
+
+Dividing by zero raises a catchable error (`sifr se taqseem nahi ho sakta`) on
+both the C and Node targets. An uncaught error prints a friendly Roman Urdu line
+instead of a crash dump.
 
 ---
 
@@ -229,9 +252,10 @@ cargo build
 
 ## Project status
 
-Working: the **core language runs on the C and Node.js targets from the same
-source file with identical output**, and the **Arduino target** turns a `.wow`
-file into a flashable `.ino` sketch.
+All three targets are working from one source language: the **core language runs
+on C and Node.js with identical output**, the **Arduino target** turns a `.wow`
+file into a flashable `.ino` sketch, and the **Node web keywords** turn a few
+lines of Roman Urdu into a running Express server.
 
 What works today:
 
@@ -242,15 +266,18 @@ What works today:
 - Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
   (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
-- Misspell a keyword and the compiler suggests the fix (`agr` → "kya aap ka matlab 'agar' tha?")
+- `koshish` / `pakdo` error handling on C and Node (e.g. catching divide-by-zero)
 - **Arduino**: `kaam shuru()` / `kaam chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
   `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
   collection tools, `pucho`) give a friendly "Arduino par nahi" error
+- **Web (Node)**: `lao` imports, `rasta` routes, `jawab` replies, and `server(port)`
+  — a real Express server with no boilerplate
+- Misspell a keyword and the compiler suggests the fix (`agr` → "kya aap ka matlab 'agar' tha?")
 - Clear, pointed compile errors in Roman Urdu
 
-Coming next, per [the plan](docs): the web keywords (`server` / `rasta` / `jawab`
-/ `lao`) and `koshish` / `pakdo`. Using one of those today produces a friendly
-"not on this target yet" error.
+Coming next, per [the plan](docs): safe access (`?.`) once there are objects to
+use it on, and the browser playground. Using an unsupported construct today
+produces a friendly "not on this target yet" error.
 
 A couple of design notes for the curious:
 

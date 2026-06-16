@@ -42,6 +42,9 @@ Do not change a spelling once the language is in use — it breaks existing code
 - **Newlines end statements**, except a `phir` chain may continue on the next line.
 - **Variables are function-scoped.** A variable first assigned inside an `agar` or a
   loop is still visible after it, like in everyday scripting languages.
+- **`koshish` / `pakdo`** catch runtime errors (on C and Node). Dividing by zero
+  raises a catchable error; on Node, errors thrown by imported libraries are
+  caught too. An uncaught error prints `Ghalti: ...` and stops the program.
 
 ## Arduino-only keywords
 
@@ -65,6 +68,11 @@ Using these with `--target c` or `--target arduino` is a compile error.
 | `server` | start web server | `app.listen()` |
 | `rasta` | define a route | `app.get()` / `app.post()` etc |
 | `jawab` | send a response | `res.send()` |
+| `lao` | import a library | `require()` (e.g. `lao express`) |
+
+On the Node target, `kaam shuru()` is also allowed: it holds startup code that
+runs once when the program begins (on Arduino the same `shuru` maps to `setup()`).
+The Express app behind `server` / `rasta` / `jawab` is created for you.
 
 ## Shared but different
 
