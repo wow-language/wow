@@ -473,4 +473,57 @@ static WowValue wow_dhundo(WowValue list, WowValue (*fn)(WowValue)) {
     return wow_null();
 }
 
+/* joro — reduce. The kid's expression uses two implicit names, `acc` and `x`,
+ * so the compiler lifts it into a two-argument function. */
+static WowValue wow_joro(WowValue list, WowValue (*fn)(WowValue, WowValue), WowValue start) {
+    WowValue acc = start;
+    if (list.type == WOW_LIST)
+        for (int i = 0; i < list.as.list->len; i++)
+            acc = fn(acc, list.as.list->items[i]);
+    return acc;
+}
+
+/* phento — shuffle into a new list (Fisher-Yates) */
+static WowValue wow_phento(WowValue list) {
+    WowValue out = wow_list_new();
+    if (list.type == WOW_LIST) {
+        for (int i = 0; i < list.as.list->len; i++) wow_list_push(out, list.as.list->items[i]);
+        for (int i = out.as.list->len - 1; i > 0; i--) {
+            int j = rand() % (i + 1);
+            WowValue t = out.as.list->items[i];
+            out.as.list->items[i] = out.as.list->items[j];
+            out.as.list->items[j] = t;
+        }
+    }
+    return out;
+}
+
+/* guroh — group by a key. There is no map type in the C runtime, so the result
+ * is a list of [key, [members...]] pairs, in first-seen key order. The same
+ * shape is produced on the node target so output matches across platforms. */
+static WowValue wow_guroh(WowValue list, WowValue (*fn)(WowValue)) {
+    WowValue out = wow_list_new();
+    if (list.type != WOW_LIST) return out;
+    for (int i = 0; i < list.as.list->len; i++) {
+        WowValue item = list.as.list->items[i];
+        WowValue key = fn(item);
+        WowValue members = wow_null();
+        for (int j = 0; j < out.as.list->len; j++) {
+            WowValue pair = out.as.list->items[j];
+            if (wow_equal(wow_at(pair, 0), key)) { members = wow_at(pair, 1); break; }
+        }
+        if (members.type == WOW_LIST) {
+            wow_list_push(members, item);
+        } else {
+            WowValue group = wow_list_new();
+            wow_list_push(group, item);
+            WowValue pair = wow_list_new();
+            wow_list_push(pair, key);
+            wow_list_push(pair, group);
+            wow_list_push(out, pair);
+        }
+    }
+    return out;
+}
+
 #endif /* AUZAAR_H */

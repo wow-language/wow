@@ -15,8 +15,8 @@ the plain English name, because most kids already learn these terms in math clas
 | Target | Support level |
 |---|---|
 | Node | Full — the complete set |
-| C | Most — backed by a bundled C runtime; collection tools use a dynamic-array type |
-| Arduino | Light — math and simple string helpers only; collection tools are too heavy for board memory |
+| C | Full — backed by a bundled C runtime; collection tools use a dynamic-array type |
+| Arduino | Light — math helpers only; lists and collection tools are too heavy for board memory |
 
 Using an unavailable function on a target produces a clear Roman Urdu compile error.
 
@@ -48,6 +48,15 @@ All collection tools take the list as their first argument so they work cleanly 
 | `phento(list)` | shuffle into random order |
 | `guroh(list, fn)` | group items by a key |
 | `silsila(start, end)` | generate a list of numbers from start to end |
+
+`joro` and `guroh` use implicit names inside their expression: `joro` reads `acc`
+(the running result) and `x` (the current item), e.g. `numbers phir joro(acc + x, 0)`;
+the others use just `x`, e.g. `numbers phir chuno(x > 5)`.
+
+`guroh` returns a list of `[key, [members...]]` pairs (in first-seen key order),
+the same shape on every target — the C runtime has no map type, so this keeps
+output identical across platforms. Read a pair with `pehla` (key) and `aakhri`
+(members).
 
 ## Strings
 

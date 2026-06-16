@@ -283,6 +283,15 @@ impl CGen {
     }
 
     fn gen_call(&mut self, name: &str, args: &[Spanned<Node>]) -> String {
+        // joro (reduce): the kid's expression uses two implicit names, `acc`
+        // and `x`, so it is lifted into a two-argument function.
+        if name == "joro" && args.len() == 3 {
+            let list = self.gen_expr(&args[0]);
+            let lam = self.lift_lambda2(&args[1]);
+            let start = self.gen_expr(&args[2]);
+            return format!("wow_joro({list}, {lam}, {start})");
+        }
+
         // Higher-order auzaar tools: lift the kid's `x`-expression predicate
         // (the second argument) into a top-level C function.
         if is_higher_order(name) && args.len() == 2 {
@@ -318,6 +327,17 @@ impl CGen {
         let name = format!("_lam_{n}");
         self.lifted.push(format!(
             "static WowValue {name}(WowValue v_x) {{\n    return {body};\n}}\n"
+        ));
+        name
+    }
+
+    /// Lift a two-argument reducer `acc + x` for joro.
+    fn lift_lambda2(&mut self, body_expr: &Spanned<Node>) -> String {
+        let body = self.gen_expr(body_expr);
+        let n = self.fresh();
+        let name = format!("_lam_{n}");
+        self.lifted.push(format!(
+            "static WowValue {name}(WowValue v_acc, WowValue v_x) {{\n    return {body};\n}}\n"
         ));
         name
     }
@@ -411,7 +431,7 @@ fn binop_fn(op: &BinOp) -> &'static str {
 
 /// auzaar tools whose argument is an implicit-`x` predicate.
 fn is_higher_order(name: &str) -> bool {
-    matches!(name, "badlo" | "chuno" | "dhundo")
+    matches!(name, "badlo" | "chuno" | "dhundo" | "guroh")
 }
 
 /// auzaar tools and shared keywords implemented in the C runtime.
@@ -426,8 +446,9 @@ fn is_builtin(name: &str) -> bool {
         // collections
             | "ginti" | "jama" | "max" | "min" | "pehla" | "aakhri" | "ulta"
             | "shamil" | "alag" | "silsila" | "tukre" | "flatten" | "tarteeb"
+            | "phento"
         // higher-order (also matched earlier)
-            | "badlo" | "chuno" | "dhundo"
+            | "badlo" | "chuno" | "dhundo" | "guroh" | "joro"
         // shared
             | "intezar"
     )

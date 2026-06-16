@@ -239,8 +239,10 @@ What works today:
 - `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
 - Loops: `har i 0 se 10 tak`, `har item mein list`, `N baar`, `jabtak`, with `roko` / `aage`
 - `kaam` / `do` functions with default parameters and recursion
-- Lists, `pucho` (input), and a good slice of the `auzaar` toolbox
+- Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
+  (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
+- Misspell a keyword and the compiler suggests the fix (`agr` → "kya aap ka matlab 'agar' tha?")
 - **Arduino**: `kaam shuru()` / `kaam chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
   `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
   collection tools, `pucho`) give a friendly "Arduino par nahi" error

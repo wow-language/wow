@@ -197,6 +197,14 @@ fn gen_expr(node: &Spanned<Node>) -> String {
 }
 
 fn gen_call(name: &str, args: &[Spanned<Node>]) -> String {
+    // joro (reduce): the kid's expression uses two implicit names, acc and x.
+    if name == "joro" && args.len() == 3 {
+        let list = gen_expr(&args[0]);
+        let reducer = gen_expr(&args[1]);
+        let start = gen_expr(&args[2]);
+        return format!("joro({list}, (v_acc, v_x) => ({reducer}), {start})");
+    }
+
     // Higher-order auzaar tools: the kid's `x`-expression becomes an arrow fn.
     if is_higher_order(name) && args.len() == 2 {
         let list = gen_expr(&args[0]);
@@ -213,7 +221,7 @@ fn gen_call(name: &str, args: &[Spanned<Node>]) -> String {
 }
 
 fn is_higher_order(name: &str) -> bool {
-    matches!(name, "badlo" | "chuno" | "dhundo")
+    matches!(name, "badlo" | "chuno" | "dhundo" | "guroh")
 }
 
 fn is_builtin(name: &str) -> bool {

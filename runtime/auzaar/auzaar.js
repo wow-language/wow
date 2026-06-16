@@ -92,12 +92,17 @@ const phento     = (list) => {
     }
     return a;
 };
+// guroh — group by a key. Returns a list of [key, [members...]] pairs in
+// first-seen key order, matching the C runtime (which has no map type).
 const guroh      = (list, fn) => {
-    return list.reduce((acc, item) => {
+    const out = [];
+    for (const item of list) {
         const key = fn(item);
-        (acc[key] = acc[key] || []).push(item);
-        return acc;
-    }, {});
+        let pair = out.find((p) => p[0] === key);
+        if (!pair) { pair = [key, []]; out.push(pair); }
+        pair[1].push(item);
+    }
+    return out;
 };
 const silsila    = (start, end) => {
     const out = [];

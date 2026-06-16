@@ -249,7 +249,44 @@ impl Parser {
                 let span = start..self.prev_span().end;
                 Spanned::new(Node::Server(Box::new(port)), span)
             }
-            _ => self.expr_or_assign_stmt(),
+            _ => {
+                self.check_keyword_typo();
+                self.expr_or_assign_stmt()
+            }
+        }
+    }
+
+    /// If a statement starts with an identifier that is one typo away from a
+    /// keyword — and isn't being used as a variable or call — suggest the fix.
+    /// e.g. `agr x > 5 { }` -> "kya aap ka matlab 'agar' tha?"
+    fn check_keyword_typo(&self) {
+        let Some(Token::Ident(name)) = self.peek() else { return };
+        let Some(kw) = keyword_suggestion(name) else { return };
+        if self.next_continues_expr() {
+            return; // it's `name = ...`, `name(...)`, `name + ...` — a real variable
+        }
+        self.err(
+            self.cur_span(),
+            &format!("'{name}' ko nahi pehchana"),
+            "ye koi wow keyword nahi",
+            Some(&format!("kya aap ka matlab '{kw}' tha?")),
+        );
+    }
+
+    /// Does the token after the current identifier make it look like a value
+    /// (assignment, call, operator, terminator) rather than a misused keyword?
+    fn next_continues_expr(&self) -> bool {
+        match self.tokens.get(self.pos + 1).map(|t| &t.token) {
+            None => true,
+            Some(t) => matches!(
+                t,
+                Token::Assign | Token::LParen | Token::Plus | Token::Minus | Token::Star
+                    | Token::Slash | Token::Percent | Token::Eq | Token::NotEq | Token::Lt
+                    | Token::Lte | Token::Gt | Token::Gte | Token::Aur | Token::Ya
+                    | Token::Phir | Token::Agar | Token::Baar | Token::Comma | Token::Dot
+                    | Token::SafeDot | Token::LBracket | Token::Newline | Token::RBrace
+                    | Token::RParen | Token::RBracket
+            ),
         }
     }
 
@@ -843,4 +880,40 @@ impl Parser {
         let mut p = Parser::new(tokens, text.to_string(), self.filename.clone());
         p.expr()
     }
+}
+
+/// Keywords a beginner might misspell. Short ones (se/do/ya) are left out — too
+/// many ordinary names sit one edit away from them.
+const SUGGESTABLE_KEYWORDS: &[&str] = &[
+    "bol", "rakho", "agar", "warna", "har", "mein", "tak", "baar", "jabtak",
+    "roko", "aage", "kaam", "sahi", "ghalat", "khali", "aur", "nahi", "lao",
+    "phir", "koshish", "pakdo", "pucho", "shuru", "chalao", "intezar",
+];
+
+/// The closest keyword within one edit of `name`, if any (both at least 3 long).
+fn keyword_suggestion(name: &str) -> Option<&'static str> {
+    if name.len() < 3 {
+        return None;
+    }
+    SUGGESTABLE_KEYWORDS
+        .iter()
+        .copied()
+        .find(|kw| kw.len() >= 3 && levenshtein(name, kw) == 1)
+}
+
+/// Plain Levenshtein edit distance.
+fn levenshtein(a: &str, b: &str) -> usize {
+    let a: Vec<char> = a.chars().collect();
+    let b: Vec<char> = b.chars().collect();
+    let mut prev: Vec<usize> = (0..=b.len()).collect();
+    let mut cur = vec![0usize; b.len() + 1];
+    for i in 1..=a.len() {
+        cur[0] = i;
+        for j in 1..=b.len() {
+            let cost = if a[i - 1] == b[j - 1] { 0 } else { 1 };
+            cur[j] = (prev[j] + 1).min(cur[j - 1] + 1).min(prev[j - 1] + cost);
+        }
+        std::mem::swap(&mut prev, &mut cur);
+    }
+    prev[b.len()]
 }

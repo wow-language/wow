@@ -6,8 +6,22 @@ mod parser;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use std::fs;
+use std::io::IsTerminal;
 use std::path::PathBuf;
 use std::process;
+
+/// Block-letter "wow" + tagline, shown in `wow --help`. The و is the Urdu letter
+/// the language is named after.
+const BANNER: &str = concat!(
+    "\n",
+    "  \x1b[1;36m#   #   #####   #   #\x1b[0m\n",
+    "  \x1b[1;36m#   #   #   #   #   #\x1b[0m\n",
+    "  \x1b[1;36m# # #   #   #   # # #\x1b[0m\n",
+    "  \x1b[1;36m## ##   #   #   ## ##\x1b[0m\n",
+    "  \x1b[1;36m#   #   #####   #   #\x1b[0m\n",
+    "\n",
+    "  \x1b[2mCode likho. Wow bolo.\x1b[0m  \x1b[33m(و)\x1b[0m\n",
+);
 
 /// The runtimes + auzaar toolbox, baked into the compiler. We write the right
 /// one next to every generated file so a wow program runs with no external setup.
@@ -20,6 +34,8 @@ const AUZAAR_ARDUINO_H: &str = include_str!("../runtime/auzaar/auzaar_arduino.h"
 #[command(name = "wow")]
 #[command(version = "0.1.0")]
 #[command(about = "Code likho. Wow bolo.")]
+#[command(before_help = BANNER)]
+#[command(arg_required_else_help = true)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -114,7 +130,11 @@ fn compile(file: &PathBuf, target: &Target, run: bool) {
         Target::Arduino => write_runtime(&out_path, "auzaar_arduino.h", AUZAAR_ARDUINO_H),
     }
 
-    println!("Tayyar: {}", out_path.display());
+    if std::io::stdout().is_terminal() {
+        println!("\x1b[32m✓\x1b[0m Tayyar: \x1b[1m{}\x1b[0m", out_path.display());
+    } else {
+        println!("Tayyar: {}", out_path.display());
+    }
 
     if run {
         run_output(&out_path, target);
