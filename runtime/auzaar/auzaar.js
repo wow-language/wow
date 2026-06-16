@@ -5,6 +5,61 @@
 'use strict';
 
 // ----------------------------------------------------------------
+// Runtime core — formatting, output, input, truthiness.
+// These mirror the C runtime so a program prints the same on every target.
+// ----------------------------------------------------------------
+
+// wow-style string form: 5 not 5.0, sahi/ghalat, khali, [a, b, c]
+const fmt = (v) => {
+    if (v === null || v === undefined) return 'khali';
+    if (typeof v === 'boolean') return v ? 'sahi' : 'ghalat';
+    if (Array.isArray(v)) return '[' + v.map(fmt).join(', ') + ']';
+    return String(v);
+};
+
+// bol — print a value
+const bol = (v) => { console.log(fmt(v)); };
+
+// pucho — print a prompt and read one line from stdin (synchronously)
+const pucho = (prompt) => {
+    process.stdout.write(fmt(prompt));
+    const fs = require('fs');
+    let s = '';
+    const buf = Buffer.alloc(1);
+    for (;;) {
+        let n;
+        try {
+            n = fs.readSync(0, buf, 0, 1, null);
+        } catch (e) {
+            if (e.code === 'EAGAIN') continue;
+            break;
+        }
+        if (n === 0) break;
+        const c = buf.toString('utf8');
+        if (c === '\n') break;
+        if (c === '\r') continue;
+        s += c;
+    }
+    return s;
+};
+
+// wow truthiness: khali and empty things are false
+const truthy = (v) => {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'number') return v !== 0;
+    if (typeof v === 'string') return v.length > 0;
+    if (Array.isArray(v)) return v.length > 0;
+    return true;
+};
+
+// intezar — wait (busy-free async is impossible synchronously; we block briefly)
+const intezar = (ms) => {
+    const end = Date.now() + Number(ms);
+    while (Date.now() < end) { /* spin */ }
+};
+
+// ----------------------------------------------------------------
 // Collections
 // ----------------------------------------------------------------
 
@@ -17,7 +72,8 @@ const ginti      = (list) => list.length;
 const jama       = (list) => list.reduce((a, b) => a + b, 0);
 const max        = (list) => Math.max(...list);
 const min        = (list) => Math.min(...list);
-const tarteeb    = (list, fn) => [...list].sort(fn);
+const tarteeb    = (list, fn) =>
+    fn ? [...list].sort(fn) : [...list].sort((a, b) => (a > b ? 1 : a < b ? -1 : 0));
 const ulta       = (list) => [...list].reverse();
 const alag       = (list) => [...new Set(list)];
 const flatten    = (list) => list.flat(Infinity);
@@ -79,10 +135,15 @@ const absolute      = (n) => Math.abs(n);
 // ----------------------------------------------------------------
 
 module.exports = {
+    // runtime core
+    fmt, bol, pucho, truthy, intezar,
+    // collections
     badlo, chuno, joro, dhundo, shamil, ginti, jama, max, min,
     tarteeb, ulta, alag, flatten, tukre, pehla, aakhri, phento,
     guroh, silsila,
+    // strings
     toro, milao, saaf, tabdeel, lambai, bara_likho, chota_likho,
+    // math
     random, random_number, round, round_up, round_down,
     square_root, power, absolute,
 };

@@ -1,0 +1,13 @@
+# pahara.wow — kisi number ka pahara (multiplication table)
+# Chalayein:  wow run pahara.wow
+#       ya:  wow run pahara.wow --target node
+
+kaam pahara(number) {
+    bol "{number} ka pahara:"
+    har i 1 se 10 tak {
+        natija = number * i
+        bol "{number} x {i} = {natija}"
+    }
+}
+
+pahara(7)

@@ -9,6 +9,12 @@ use std::fs;
 use std::path::PathBuf;
 use std::process;
 
+/// The runtimes + auzaar toolbox, baked into the compiler. We write the right
+/// one next to every generated file so a wow program runs with no external setup.
+const AUZAAR_H: &str = include_str!("../runtime/auzaar/auzaar.h");
+const AUZAAR_JS: &str = include_str!("../runtime/auzaar/auzaar.js");
+const AUZAAR_ARDUINO_H: &str = include_str!("../runtime/auzaar/auzaar_arduino.h");
+
 /// wow — Roman Urdu programming language
 #[derive(Parser)]
 #[command(name = "wow")]
@@ -101,11 +107,27 @@ fn compile(file: &PathBuf, target: &Target, run: bool) {
         process::exit(1);
     });
 
-    println!("Tayyar: {:?}", out_path);
+    // Write the auzaar runtime next to the output so it runs with no setup.
+    match target {
+        Target::C => write_runtime(&out_path, "auzaar.h", AUZAAR_H),
+        Target::Node => write_runtime(&out_path, "auzaar.js", AUZAAR_JS),
+        Target::Arduino => write_runtime(&out_path, "auzaar_arduino.h", AUZAAR_ARDUINO_H),
+    }
+
+    println!("Tayyar: {}", out_path.display());
 
     if run {
         run_output(&out_path, target);
     }
+}
+
+/// Write a bundled runtime file (auzaar.h / auzaar.js) next to the output.
+fn write_runtime(out_path: &PathBuf, name: &str, contents: &str) {
+    let runtime = out_path.with_file_name(name);
+    fs::write(&runtime, contents).unwrap_or_else(|_| {
+        eprintln!("Ghalti: runtime ({name}) nahi likh saka");
+        process::exit(1);
+    });
 }
 
 fn output_path(source: &PathBuf, target: &Target) -> PathBuf {
@@ -122,13 +144,19 @@ fn run_output(path: &PathBuf, target: &Target) {
     use std::process::Command;
     match target {
         Target::C => {
-            // Compile with gcc then run
+            // Compile with gcc (-lm for the math functions) then run.
             let binary = path.with_extension("");
             let status = Command::new("gcc")
-                .args([path.to_str().unwrap(), "-o", binary.to_str().unwrap()])
+                .args([path.to_str().unwrap(), "-o", binary.to_str().unwrap(), "-lm"])
                 .status();
-            if status.map(|s| s.success()).unwrap_or(false) {
-                Command::new(&binary).status().ok();
+            match status {
+                Ok(s) if s.success() => {
+                    Command::new(&binary).status().ok();
+                }
+                _ => {
+                    eprintln!("Ghalti: gcc se compile nahi ho saka");
+                    process::exit(1);
+                }
             }
         }
         Target::Arduino => {

@@ -61,7 +61,9 @@ pub enum Token {
     // Literals
     // ----------------------------------------------------------------
 
-    #[regex(r"-?[0-9]+(\.[0-9]+)?", |lex| lex.slice().parse::<f64>().ok())]
+    // No leading minus here: "5-3" must lex as 5, -, 3 — not 5, -3.
+    // Unary negation is handled in the parser instead.
+    #[regex(r"[0-9]+(\.[0-9]+)?", |lex| lex.slice().parse::<f64>().ok())]
     Number(f64),
 
     /// Quoted string: "hello {naam}"

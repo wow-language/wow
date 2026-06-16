@@ -35,6 +35,14 @@ Do not change a spelling once the language is in use — it breaks existing code
 | `pakdo` | catch | pairs with koshish |
 | `pucho` | ask | read user input |
 
+## Semantics notes
+
+- **Ranges are inclusive.** `har i 1 se 5 tak { }` runs the body for i = 1, 2, 3, 4, 5.
+  This reads the way a beginner says it out loud ("ek se panch tak").
+- **Newlines end statements**, except a `phir` chain may continue on the next line.
+- **Variables are function-scoped.** A variable first assigned inside an `agar` or a
+  loop is still visible after it, like in everyday scripting languages.
+
 ## Arduino-only keywords
 
 Using these with `--target c` or `--target node` is a compile error.

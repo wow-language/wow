@@ -1,0 +1,10 @@
+# ginti.wow — Serial monitor par ginti (count up on the serial monitor)
+# Flash with:  wow build ginti.wow --target arduino
+
+counter = 0
+
+kaam chalao() {
+    counter = counter + 1
+    bol "Ginti: {counter}"
+    intezar(500)
+}
