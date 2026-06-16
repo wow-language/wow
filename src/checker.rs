@@ -177,12 +177,6 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
                 "library import abhi desktop (C) par nahi",
                 "abhi --target node istemaal karein",
             ),
-            Node::Koshish { .. } => flag(
-                errors, span,
-                "'koshish/pakdo' abhi C par nahi",
-                "error handling abhi desktop (C) par nahi aaya",
-                "agle phase mein aayega",
-            ),
             Node::SafeAccess { .. } => flag(
                 errors, span,
                 "'?.' abhi C par nahi",

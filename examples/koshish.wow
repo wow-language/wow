@@ -1,0 +1,15 @@
+# koshish.wow — ghalti pakadna (catching errors)
+# Chalayein:  wow run koshish.wow      ya      wow run koshish.wow --target node
+
+kaam mehfooz_taqseem(a, b) {
+    koshish {
+        do a / b
+    } pakdo ghalti {
+        bol "Ghalti pakdi: {ghalti}"
+        do khali
+    }
+}
+
+bol "10 / 2 = {mehfooz_taqseem(10, 2)}"
+bol "10 / 0 = {mehfooz_taqseem(10, 0)}"
+bol "Program theek se khatam hua."

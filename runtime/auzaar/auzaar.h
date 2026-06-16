@@ -24,6 +24,33 @@
 #include <ctype.h>
 #include <math.h>
 #include <time.h>
+#include <setjmp.h>
+
+/* ================================================================
+ * Error handling (koshish / pakdo)
+ *
+ * C has no exceptions, so we keep a stack of jump targets. wow_raise jumps to
+ * the innermost active koshish; with none active it prints the message and
+ * exits. The compiler manages the stack so early `do`/`roko`/`aage` out of a
+ * koshish body still unwind correctly.
+ * ================================================================ */
+
+#define WOW_MAX_HANDLERS 64
+static jmp_buf wow_handlers[WOW_MAX_HANDLERS];
+static int wow_handler_top = 0;
+static char wow_error_msg[256];
+
+static void wow_raise(const char *msg) {
+    size_t n = strlen(msg);
+    if (n >= sizeof(wow_error_msg)) n = sizeof(wow_error_msg) - 1;
+    memcpy(wow_error_msg, msg, n);
+    wow_error_msg[n] = '\0';
+    if (wow_handler_top > 0) {
+        longjmp(wow_handlers[wow_handler_top - 1], 1);
+    }
+    fprintf(stderr, "Ghalti: %s\n", wow_error_msg);
+    exit(1);
+}
 
 /* ================================================================
  * The value type
@@ -215,8 +242,16 @@ static WowValue wow_add(WowValue a, WowValue b) {
 }
 static WowValue wow_sub(WowValue a, WowValue b) { return wow_num(wow_as_num(a) - wow_as_num(b)); }
 static WowValue wow_mul(WowValue a, WowValue b) { return wow_num(wow_as_num(a) * wow_as_num(b)); }
-static WowValue wow_div(WowValue a, WowValue b) { return wow_num(wow_as_num(a) / wow_as_num(b)); }
-static WowValue wow_mod(WowValue a, WowValue b) { return wow_num(fmod(wow_as_num(a), wow_as_num(b))); }
+static WowValue wow_div(WowValue a, WowValue b) {
+    double d = wow_as_num(b);
+    if (d == 0.0) wow_raise("sifr se taqseem nahi ho sakta");
+    return wow_num(wow_as_num(a) / d);
+}
+static WowValue wow_mod(WowValue a, WowValue b) {
+    double d = wow_as_num(b);
+    if (d == 0.0) wow_raise("sifr se taqseem nahi ho sakta");
+    return wow_num(fmod(wow_as_num(a), d));
+}
 static WowValue wow_neg(WowValue a)             { return wow_num(-wow_as_num(a)); }
 
 static int wow_equal(WowValue a, WowValue b) {

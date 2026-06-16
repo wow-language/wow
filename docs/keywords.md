@@ -42,6 +42,9 @@ Do not change a spelling once the language is in use — it breaks existing code
 - **Newlines end statements**, except a `phir` chain may continue on the next line.
 - **Variables are function-scoped.** A variable first assigned inside an `agar` or a
   loop is still visible after it, like in everyday scripting languages.
+- **`koshish` / `pakdo`** catch runtime errors (on C and Node). Dividing by zero
+  raises a catchable error; on Node, errors thrown by imported libraries are
+  caught too. An uncaught error prints `Ghalti: ...` and stops the program.
 
 ## Arduino-only keywords
 

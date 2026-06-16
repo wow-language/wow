@@ -187,6 +187,23 @@ or `(req, res)` to write. `kaam shuru()` holds code that runs at startup.
 
 ---
 
+## Catching mistakes with `koshish` / `pakdo`
+
+```wow
+koshish {
+    natija = 10 / 0
+    bol natija
+} pakdo ghalti {
+    bol "Ghalti pakdi: {ghalti}"
+}
+```
+
+Dividing by zero raises a catchable error (`sifr se taqseem nahi ho sakta`) on
+both the C and Node targets. An uncaught error prints a friendly Roman Urdu line
+instead of a crash dump.
+
+---
+
 ## Error messages in Roman Urdu
 
 wow tries to explain mistakes clearly:
@@ -249,6 +266,7 @@ What works today:
 - Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
   (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
+- `koshish` / `pakdo` error handling on C and Node (e.g. catching divide-by-zero)
 - **Arduino**: `kaam shuru()` / `kaam chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
   `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
   collection tools, `pucho`) give a friendly "Arduino par nahi" error
@@ -257,9 +275,9 @@ What works today:
 - Misspell a keyword and the compiler suggests the fix (`agr` → "kya aap ka matlab 'agar' tha?")
 - Clear, pointed compile errors in Roman Urdu
 
-Coming next, per [the plan](docs): `koshish` / `pakdo` (error handling) and the
-playground. Using an unsupported construct today produces a friendly
-"not on this target yet" error.
+Coming next, per [the plan](docs): safe access (`?.`) once there are objects to
+use it on, and the browser playground. Using an unsupported construct today
+produces a friendly "not on this target yet" error.
 
 A couple of design notes for the curious:
 
