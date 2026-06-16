@@ -21,8 +21,8 @@ Do not change a spelling once the language is in use — it breaks existing code
 | `jabtak` | as long as / while | |
 | `roko` | stop | break |
 | `aage` | forward / next | continue |
-| `kaam` | task | define a function |
-| `do` | give | return a value: `do nateeja` |
+| `banao` | make | define a function |
+| `bhejo` | send | return a value: `bhejo nateeja` |
 | `sahi` | correct | true |
 | `ghalat` | wrong | false |
 | `khali` | empty | null |
@@ -32,7 +32,7 @@ Do not change a spelling once the language is in use — it breaks existing code
 | `lao` | bring | import: `lao express` |
 | `phir` | then | chaining: `list phir chuno(x > 5) phir tarteeb` |
 | `koshish` | try | error handling |
-| `pakdo` | catch | pairs with koshish |
+| `pakro` | catch | pairs with koshish |
 | `pucho` | ask | read user input |
 
 ## Semantics notes
@@ -42,7 +42,7 @@ Do not change a spelling once the language is in use — it breaks existing code
 - **Newlines end statements**, except a `phir` chain may continue on the next line.
 - **Variables are function-scoped.** A variable first assigned inside an `agar` or a
   loop is still visible after it, like in everyday scripting languages.
-- **`koshish` / `pakdo`** catch runtime errors (on C and Node). Dividing by zero
+- **`koshish` / `pakro`** catch runtime errors (on C and Node). Dividing by zero
   raises a catchable error; on Node, errors thrown by imported libraries are
   caught too. An uncaught error prints `Ghalti: ...` and stops the program.
 
@@ -70,7 +70,7 @@ Using these with `--target c` or `--target arduino` is a compile error.
 | `jawab` | send a response | `res.send()` |
 | `lao` | import a library | `require()` (e.g. `lao express`) |
 
-On the Node target, `kaam shuru()` is also allowed: it holds startup code that
+On the Node target, `banao shuru()` is also allowed: it holds startup code that
 runs once when the program begins (on Arduino the same `shuru` maps to `setup()`).
 The Express app behind `server` / `rasta` / `jawab` is created for you.
 

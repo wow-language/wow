@@ -22,8 +22,8 @@ pub enum Token {
     #[token("jabtak")]  Jabtak,
     #[token("roko")]    Roko,
     #[token("aage")]    Aage,
-    #[token("kaam")]    Kaam,
-    #[token("do")]      Do,
+    #[token("banao")]   Banao,
+    #[token("bhejo")]    Bhejo,
     #[token("sahi")]    Sahi,
     #[token("ghalat")]  Ghalat,
     #[token("khali")]   Khali,
@@ -33,7 +33,7 @@ pub enum Token {
     #[token("lao")]     Lao,
     #[token("phir")]    Phir,
     #[token("koshish")] Koshish,
-    #[token("pakdo")]   Pakdo,
+    #[token("pakro")]   Pakro,
     #[token("pucho")]   Pucho,
 
     // ----------------------------------------------------------------

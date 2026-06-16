@@ -3,11 +3,11 @@
 
 LED = 13
 
-kaam shuru() {
+banao shuru() {
     pin_set(LED, output)
 }
 
-kaam chalao() {
+banao chalao() {
     pin_likho(LED, on)
     intezar(1000)
     pin_likho(LED, off)

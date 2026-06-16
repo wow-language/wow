@@ -2,7 +2,7 @@
 # Chalayein:  wow run pahara.wow
 #       ya:  wow run pahara.wow --target node
 
-kaam pahara(number) {
+banao pahara(number) {
     bol "{number} ka pahara:"
     har i 1 se 10 tak {
         natija = number * i

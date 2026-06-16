@@ -50,7 +50,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
 fn uses_web(node: &Spanned<Node>) -> bool {
     match &node.node {
         Node::Server(_) | Node::Rasta { .. } | Node::Jawab(_) => true,
-        Node::ArduinoShuru(b) | Node::ArduinoChalao(b) | Node::Kaam { body: b, .. } => {
+        Node::ArduinoShuru(b) | Node::ArduinoChalao(b) | Node::Banao { body: b, .. } => {
             b.iter().any(uses_web)
         }
         Node::Agar { then_body, else_ifs, else_body, .. } => {
@@ -69,7 +69,7 @@ fn uses_web(node: &Spanned<Node>) -> bool {
 fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
     let pad = "    ".repeat(depth);
     match &node.node {
-        Node::Kaam { naam, params, body } => {
+        Node::Banao { naam, params, body } => {
             let ps: Vec<String> = params
                 .iter()
                 .map(|p| match &p.default {
@@ -91,7 +91,7 @@ fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
         }
 
         Node::Bol(e) => format!("{pad}bol({});\n", gen_expr(e)),
-        Node::Do(e) => format!("{pad}return {};\n", gen_expr(e)),
+        Node::Bhejo(e) => format!("{pad}return {};\n", gen_expr(e)),
         Node::Roko => format!("{pad}break;\n"),
         Node::Aage => format!("{pad}continue;\n"),
 
@@ -174,7 +174,7 @@ fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
         // an HTTP status code, and formats values the wow way.
         Node::Jawab(e) => format!("{pad}res.send(fmt({}));\n", gen_expr(e)),
 
-        // koshish { ... } pakdo ghalti { ... }  ->  try / catch
+        // koshish { ... } pakro ghalti { ... }  ->  try / catch
         Node::Koshish { body, catch_var, catch_body } => {
             let mut s = format!("{pad}try {{\n");
             s.push_str(&gen_block(body, depth + 1));
@@ -190,7 +190,7 @@ fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
             s
         }
 
-        // kaam shuru() on Node is just startup code that runs immediately.
+        // banao shuru() on Node is just startup code that runs immediately.
         Node::ArduinoShuru(body) => gen_block(body, depth),
         Node::ArduinoChalao(_) => format!("{pad}/* chalao() Node par nahi chalta */\n"),
 

@@ -9,7 +9,7 @@
 ## What it looks like
 
 ```wow
-kaam salam(naam = "dost") {
+banao salam(naam = "dost") {
     bol "Salam {naam}! Kaise ho?"
 }
 
@@ -55,11 +55,11 @@ Salam Ahmad! Kaise ho?
 | `har item mein lista { }` | list for loop |
 | `3 baar { }` | repeat N times |
 | `jabtak x < 10 { }` | while |
-| `kaam naam(params) { }` | define a function |
-| `do nateeja` | return a value |
+| `banao naam(params) { }` | define a function |
+| `bhejo nateeja` | return a value |
 | `pucho "Kya naam hai?"` | read user input |
 | `lao express` | import a library |
-| `koshish { } pakdo ghalti { }` | try / catch |
+| `koshish { } pakro ghalti { }` | try / catch |
 
 ### Operators
 
@@ -141,11 +141,11 @@ Auto-loaded everywhere, no import needed.
 ## Arduino example
 
 ```wow
-kaam shuru() {
+banao shuru() {
     pin_set(13, output)
 }
 
-kaam chalao() {
+banao chalao() {
     pin_likho(13, on)
     intezar(1000)
     pin_likho(13, off)
@@ -165,7 +165,7 @@ wow build blink.wow --target arduino
 ```wow
 lao express
 
-kaam shuru() {
+banao shuru() {
     server(3000)
 }
 
@@ -183,17 +183,17 @@ node server.js                                # open http://localhost:3000
 
 `rasta` registers a route, `jawab` sends the reply, and `server(port)` starts
 listening — the Express app is wired up for you, so there's no `app = express()`
-or `(req, res)` to write. `kaam shuru()` holds code that runs at startup.
+or `(req, res)` to write. `banao shuru()` holds code that runs at startup.
 
 ---
 
-## Catching mistakes with `koshish` / `pakdo`
+## Catching mistakes with `koshish` / `pakro`
 
 ```wow
 koshish {
     natija = 10 / 0
     bol natija
-} pakdo ghalti {
+} pakro ghalti {
     bol "Ghalti pakdi: {ghalti}"
 }
 ```
@@ -262,12 +262,12 @@ What works today:
 - Variables, `bol`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
 - `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
 - Loops: `har i 0 se 10 tak`, `har item mein list`, `N baar`, `jabtak`, with `roko` / `aage`
-- `kaam` / `do` functions with default parameters and recursion
+- `banao` / `bhejo` functions with default parameters and recursion
 - Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
   (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
-- `koshish` / `pakdo` error handling on C and Node (e.g. catching divide-by-zero)
-- **Arduino**: `kaam shuru()` / `kaam chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
+- `koshish` / `pakro` error handling on C and Node (e.g. catching divide-by-zero)
+- **Arduino**: `banao shuru()` / `banao chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
   `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
   collection tools, `pucho`) give a friendly "Arduino par nahi" error
 - **Web (Node)**: `lao` imports, `rasta` routes, `jawab` replies, and `server(port)`

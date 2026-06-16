@@ -215,12 +215,12 @@ impl Parser {
                 let span = start..self.prev_span().end;
                 Spanned::new(Node::Jabtak { condition: Box::new(condition), body }, span)
             }
-            Some(Token::Kaam) => self.kaam_stmt(),
-            Some(Token::Do) => {
+            Some(Token::Banao) => self.banao_stmt(),
+            Some(Token::Bhejo) => {
                 self.advance();
                 let e = self.expr();
                 let span = start..e.span.end;
-                Spanned::new(Node::Do(Box::new(e)), span)
+                Spanned::new(Node::Bhejo(Box::new(e)), span)
             }
             Some(Token::Roko) => {
                 let span = self.cur_span();
@@ -373,11 +373,11 @@ impl Parser {
         }
     }
 
-    fn kaam_stmt(&mut self) -> Spanned<Node> {
+    fn banao_stmt(&mut self) -> Spanned<Node> {
         let start = self.cur_span().start;
-        self.advance(); // kaam
+        self.advance(); // banao
 
-        // `kaam shuru()` / `kaam chalao()` are the Arduino entry points.
+        // `banao shuru()` / `banao chalao()` are the Arduino entry points.
         if self.is(&Token::Shuru) {
             self.advance();
             self.expect_lparen();
@@ -401,7 +401,7 @@ impl Parser {
         self.expect_rparen();
         let body = self.block();
         let span = start..self.prev_span().end;
-        Spanned::new(Node::Kaam { naam, params, body }, span)
+        Spanned::new(Node::Banao { naam, params, body }, span)
     }
 
     fn parse_params(&mut self) -> Vec<Param> {
@@ -435,10 +435,10 @@ impl Parser {
         let body = self.block();
         self.skip_newlines();
         self.expect_simple(
-            &Token::Pakdo,
-            "'pakdo' chahiye",
-            "koshish ke baad 'pakdo' likhein",
-            Some("misaal: koshish { ... } pakdo ghalti { ... }"),
+            &Token::Pakro,
+            "'pakro' chahiye",
+            "koshish ke baad 'pakro' likhein",
+            Some("misaal: koshish { ... } pakro ghalti { ... }"),
         );
         let catch_var = if let Some(Token::Ident(_)) = self.peek() {
             Some(self.ident())
@@ -882,12 +882,12 @@ impl Parser {
     }
 }
 
-/// Keywords a beginner might misspell. Short ones (se/do/ya) are left out — too
+/// Keywords a beginner might misspell. Short ones (se/ya) are left out — too
 /// many ordinary names sit one edit away from them.
 const SUGGESTABLE_KEYWORDS: &[&str] = &[
     "bol", "rakho", "agar", "warna", "har", "mein", "tak", "baar", "jabtak",
-    "roko", "aage", "kaam", "sahi", "ghalat", "khali", "aur", "nahi", "lao",
-    "phir", "koshish", "pakdo", "pucho", "shuru", "chalao", "intezar",
+    "roko", "aage", "banao", "bhejo", "sahi", "ghalat", "khali", "aur", "nahi", "lao",
+    "phir", "koshish", "pakro", "pucho", "shuru", "chalao", "intezar",
 ];
 
 /// The closest keyword within one edit of `name`, if any (both at least 3 long).
