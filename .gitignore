@@ -9,6 +9,11 @@ Cargo.lock
 *.swo
 .DS_Store
 
+# npm — the Node web target needs `npm install express` next to the generated .js
+node_modules/
+examples/package.json
+examples/package-lock.json
+
 # wow compiler output — generated next to .wow source files when building examples.
 # The real runtime sources live in runtime/auzaar/ and are NOT ignored.
 examples/*.c

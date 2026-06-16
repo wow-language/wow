@@ -65,6 +65,11 @@ Using these with `--target c` or `--target arduino` is a compile error.
 | `server` | start web server | `app.listen()` |
 | `rasta` | define a route | `app.get()` / `app.post()` etc |
 | `jawab` | send a response | `res.send()` |
+| `lao` | import a library | `require()` (e.g. `lao express`) |
+
+On the Node target, `kaam shuru()` is also allowed: it holds startup code that
+runs once when the program begins (on Arduino the same `shuru` maps to `setup()`).
+The Express app behind `server` / `rasta` / `jawab` is created for you.
 
 ## Shared but different
 

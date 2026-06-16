@@ -1,4 +1,4 @@
-use crate::ast::{BinOp, InterpolPart, Node, Spanned};
+use crate::ast::{BinOp, HttpMethod, InterpolPart, Node, Spanned};
 
 /// Walk the AST and emit Node.js JavaScript.
 ///
@@ -20,6 +20,14 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     out.push_str("        round, round_up, round_down, square_root, power, absolute } = _auzaar;\n\n");
 
     if let Node::Program(stmts) = &ast.node {
+        // A program that uses server/rasta/jawab gets an Express app, wired up
+        // automatically so a beginner never writes `app = express()` or
+        // `(req, res)`. Express handles routes registered after listen(), so we
+        // can emit everything in source order.
+        if stmts.iter().any(uses_web) {
+            out.push_str("const _express = require('express');\n");
+            out.push_str("const _app = _express();\n\n");
+        }
         // Function declarations hoist in JS, so order does not matter.
         for stmt in stmts {
             out.push_str(&gen_node(stmt, 0));
@@ -27,6 +35,26 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     }
 
     out
+}
+
+/// Does this subtree use any of the web keywords (server / rasta / jawab)?
+fn uses_web(node: &Spanned<Node>) -> bool {
+    match &node.node {
+        Node::Server(_) | Node::Rasta { .. } | Node::Jawab(_) => true,
+        Node::ArduinoShuru(b) | Node::ArduinoChalao(b) | Node::Kaam { body: b, .. } => {
+            b.iter().any(uses_web)
+        }
+        Node::Agar { then_body, else_ifs, else_body, .. } => {
+            then_body.iter().any(uses_web)
+                || else_ifs.iter().any(|(_, b)| b.iter().any(uses_web))
+                || else_body.as_ref().map_or(false, |b| b.iter().any(uses_web))
+        }
+        Node::HarRange { body, .. }
+        | Node::HarList { body, .. }
+        | Node::Baar { body, .. }
+        | Node::Jabtak { body, .. } => body.iter().any(uses_web),
+        _ => false,
+    }
 }
 
 fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
@@ -108,6 +136,38 @@ fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
             s.push_str(&format!("{pad}}}\n"));
             s
         }
+
+        // ---- web (Node) ----
+
+        // lao express  ->  const v_express = require("express")
+        Node::Lao { name, path } => {
+            format!("{pad}const v_{name} = require(\"{}\");\n", escape_js(path))
+        }
+
+        // rasta GET "/path" { ... }  ->  _app.get("/path", (req, res) => { ... })
+        Node::Rasta { method, path, body } => {
+            let m = match method {
+                HttpMethod::Get => "get",
+                HttpMethod::Post => "post",
+                HttpMethod::Put => "put",
+                HttpMethod::Delete => "delete",
+            };
+            let mut s = format!("{pad}_app.{m}(\"{}\", (req, res) => {{\n", escape_js(path));
+            s.push_str(&gen_block(body, depth + 1));
+            s.push_str(&format!("{pad}}});\n"));
+            s
+        }
+
+        // server(port)  ->  _app.listen(port)
+        Node::Server(port) => format!("{pad}_app.listen({});\n", gen_expr(port)),
+
+        // jawab expr  ->  res.send(...). fmt() keeps a number from being read as
+        // an HTTP status code, and formats values the wow way.
+        Node::Jawab(e) => format!("{pad}res.send(fmt({}));\n", gen_expr(e)),
+
+        // kaam shuru() on Node is just startup code that runs immediately.
+        Node::ArduinoShuru(body) => gen_block(body, depth),
+        Node::ArduinoChalao(_) => format!("{pad}/* chalao() Node par nahi chalta */\n"),
 
         // Anything else is an expression evaluated for its effect.
         _ => format!("{pad}{};\n", gen_expr(node)),
