@@ -12,6 +12,9 @@ use ariadne::{Color, Label, Report, ReportKind, Source};
 pub fn check(ast: &Spanned<Node>, target: &Target, source: &str, filename: &str) {
     let mut errors: Vec<Violation> = Vec::new();
     walk(ast, target, &mut errors);
+    if *target == Target::Arduino {
+        check_arduino_toplevel(ast, &mut errors);
+    }
 
     if errors.is_empty() {
         return;
@@ -202,6 +205,43 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
                 "library import Arduino par nahi",
                 "Arduino ke liye built-in pin wale kaam istemaal karein",
             ),
+            // The board's couple of KB of RAM can't hold lists / collections.
+            Node::List(_) => flag(
+                errors, span,
+                "Arduino par list nahi",
+                "board ki memory itni kam hai ke list nahi rakh sakte",
+                "list wala kaam C ya node target par karein",
+            ),
+            Node::HarList { .. } => flag(
+                errors, span,
+                "Arduino par list loop nahi",
+                "'har ... mein ...' ke liye list chahiye, jo Arduino par nahi",
+                "'har i 0 se 10 tak' wala loop istemaal karein",
+            ),
+            Node::Call { name, .. } if is_collection_tool(name) => flag(
+                errors, span,
+                "Arduino par ye auzaar nahi",
+                "collection/string auzaar board ki memory mein nahi aate",
+                "Arduino par sirf math wale auzaar (round, power, ...) chalte hain",
+            ),
+            Node::Pucho(_) => flag(
+                errors, span,
+                "Arduino par 'pucho' nahi",
+                "board par keyboard input nahi hota",
+                "sensor parhne ke liye pin_parho istemaal karein",
+            ),
+            Node::Koshish { .. } => flag(
+                errors, span,
+                "Arduino par 'koshish/pakdo' nahi",
+                "error handling abhi Arduino par nahi",
+                "agle phase mein aayega",
+            ),
+            Node::SafeAccess { .. } => flag(
+                errors, span,
+                "Arduino par '?.' nahi",
+                "safe access abhi Arduino par nahi",
+                "agle phase mein aayega",
+            ),
             _ => {}
         },
 
@@ -225,4 +265,39 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
 
 fn is_arduino_call(name: &str) -> bool {
     matches!(name, "pin_set" | "pin_likho" | "pin_parho")
+}
+
+/// auzaar tools too heavy for a microcontroller (everything except the math
+/// helpers, which the Arduino runtime does provide).
+fn is_collection_tool(name: &str) -> bool {
+    matches!(
+        name,
+        "badlo" | "chuno" | "joro" | "dhundo" | "shamil" | "ginti" | "jama"
+            | "max" | "min" | "tarteeb" | "ulta" | "alag" | "flatten" | "tukre"
+            | "pehla" | "aakhri" | "phento" | "guroh" | "silsila"
+            | "toro" | "milao" | "saaf" | "tabdeel" | "lambai"
+            | "bara_likho" | "chota_likho"
+    )
+}
+
+/// On Arduino, executable code must live inside `kaam shuru()` / `kaam chalao()`
+/// (or a helper `kaam`). Only variable declarations and function definitions are
+/// allowed at the top level, mirroring how an .ino sketch is structured.
+fn check_arduino_toplevel(ast: &Spanned<Node>, errors: &mut Vec<Violation>) {
+    let Node::Program(stmts) = &ast.node else { return };
+    for stmt in stmts {
+        match &stmt.node {
+            Node::Assign { .. }
+            | Node::Kaam { .. }
+            | Node::ArduinoShuru(_)
+            | Node::ArduinoChalao(_) => {}
+            _ => flag(
+                errors,
+                &stmt.span,
+                "Arduino par code yahan nahi chal sakta",
+                "ye line kisi kaam ke bahar hai",
+                "isay 'kaam shuru() { ... }' ya 'kaam chalao() { ... }' ke andar likhein",
+            ),
+        }
+    }
 }

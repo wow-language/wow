@@ -219,6 +219,9 @@ cargo build
 # same source, JavaScript target (needs node)
 ./target/debug/wow run examples/pahara.wow --target node
 
+# the Arduino target emits a .ino sketch (flash it with arduino-cli)
+./target/debug/wow build examples/blink.wow --target arduino  # -> examples/blink.ino
+
 # just emit the generated code without running it
 ./target/debug/wow build examples/salam.wow            # -> examples/salam.c
 ./target/debug/wow build examples/salam.wow --target node  # -> examples/salam.js
@@ -226,8 +229,9 @@ cargo build
 
 ## Project status
 
-Phase 1 is working: the **core language runs on both the C and Node.js targets
-from the same source file**, with identical output.
+Working: the **core language runs on the C and Node.js targets from the same
+source file with identical output**, and the **Arduino target** turns a `.wow`
+file into a flashable `.ino` sketch.
 
 What works today:
 
@@ -237,11 +241,14 @@ What works today:
 - `kaam` / `do` functions with default parameters and recursion
 - Lists, `pucho` (input), and a good slice of the `auzaar` toolbox
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
+- **Arduino**: `kaam shuru()` / `kaam chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
+  `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
+  collection tools, `pucho`) give a friendly "Arduino par nahi" error
 - Clear, pointed compile errors in Roman Urdu
 
-Coming next, per [the plan](docs): the Arduino target (`shuru` / `chalao` / pins),
-the web keywords (`server` / `rasta` / `jawab` / `lao`), and `koshish` / `pakdo`.
-Using one of those today produces a friendly "not on this target yet" error.
+Coming next, per [the plan](docs): the web keywords (`server` / `rasta` / `jawab`
+/ `lao`) and `koshish` / `pakdo`. Using one of those today produces a friendly
+"not on this target yet" error.
 
 A couple of design notes for the curious:
 

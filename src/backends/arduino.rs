@@ -33,6 +33,11 @@ pub fn generate(ast: &Spanned<Node>) -> String {
         }
     }
 
+    // Top-level variables are true file-scope globals on Arduino, readable and
+    // writable from setup()/loop()/helpers — so they must not be re-hoisted as
+    // locals (that would reset them on every loop()).
+    let global_names: BTreeSet<String> = globals.iter().map(|(n, _)| (*n).clone()).collect();
+
     let uses_bol = stmts.iter().any(uses_bol_in);
 
     let mut out = String::new();
@@ -57,7 +62,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
         out.push('\n');
 
         for (naam, params, body) in &funcs {
-            out.push_str(&gen_function(naam, params, body));
+            out.push_str(&gen_function(naam, params, body, &global_names));
         }
     }
 
@@ -67,7 +72,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
         out.push_str("    Serial.begin(9600);\n");
     }
     if let Some(body) = shuru {
-        out.push_str(&declare_locals(body, &[], 1));
+        out.push_str(&declare_locals(body, &[], &global_names, 1));
         for stmt in body {
             out.push_str(&gen_stmt(stmt, 1));
         }
@@ -77,7 +82,7 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     // loop()
     out.push_str("void loop() {\n");
     if let Some(body) = chalao {
-        out.push_str(&declare_locals(body, &[], 1));
+        out.push_str(&declare_locals(body, &[], &global_names, 1));
         for stmt in body {
             out.push_str(&gen_stmt(stmt, 1));
         }
@@ -87,12 +92,17 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     out
 }
 
-fn gen_function(naam: &str, params: &[Param], body: &[Spanned<Node>]) -> String {
+fn gen_function(
+    naam: &str,
+    params: &[Param],
+    body: &[Spanned<Node>],
+    globals: &BTreeSet<String>,
+) -> String {
     let param_names: Vec<String> = params.iter().map(|p| p.name.clone()).collect();
     let ps: Vec<String> = params.iter().map(|p| format!("double v_{}", p.name)).collect();
 
     let mut s = format!("double f_{naam}({}) {{\n", ps.join(", "));
-    s.push_str(&declare_locals(body, &param_names, 1));
+    s.push_str(&declare_locals(body, &param_names, globals, 1));
     for stmt in body {
         s.push_str(&gen_stmt(stmt, 1));
     }
@@ -321,7 +331,12 @@ fn escape_cpp(s: &str) -> String {
 // Local hoisting (wow variables are function-scoped, C++ blocks are not)
 // ----------------------------------------------------------------
 
-fn declare_locals(body: &[Spanned<Node>], params: &[String], depth: usize) -> String {
+fn declare_locals(
+    body: &[Spanned<Node>],
+    params: &[String],
+    globals: &BTreeSet<String>,
+    depth: usize,
+) -> String {
     let mut names = BTreeSet::new();
     for stmt in body {
         collect_assigns(stmt, &mut names);
@@ -329,7 +344,7 @@ fn declare_locals(body: &[Spanned<Node>], params: &[String], depth: usize) -> St
     let pad = "    ".repeat(depth);
     let mut out = String::new();
     for name in &names {
-        if params.iter().any(|p| p == name) {
+        if params.iter().any(|p| p == name) || globals.contains(name) {
             continue;
         }
         out.push_str(&format!("{pad}double v_{name} = 0;\n"));

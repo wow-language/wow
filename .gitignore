@@ -16,8 +16,10 @@ examples/*.js
 examples/*.ino
 examples/auzaar.h
 examples/auzaar.js
+examples/auzaar_arduino.h
 # compiled example binaries (no extension)
 examples/salam
 examples/blink
 examples/server
 examples/pahara
+examples/ginti

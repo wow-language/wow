@@ -13,6 +13,7 @@ use std::process;
 /// one next to every generated file so a wow program runs with no external setup.
 const AUZAAR_H: &str = include_str!("../runtime/auzaar/auzaar.h");
 const AUZAAR_JS: &str = include_str!("../runtime/auzaar/auzaar.js");
+const AUZAAR_ARDUINO_H: &str = include_str!("../runtime/auzaar/auzaar_arduino.h");
 
 /// wow — Roman Urdu programming language
 #[derive(Parser)]
@@ -110,7 +111,7 @@ fn compile(file: &PathBuf, target: &Target, run: bool) {
     match target {
         Target::C => write_runtime(&out_path, "auzaar.h", AUZAAR_H),
         Target::Node => write_runtime(&out_path, "auzaar.js", AUZAAR_JS),
-        Target::Arduino => {}
+        Target::Arduino => write_runtime(&out_path, "auzaar_arduino.h", AUZAAR_ARDUINO_H),
     }
 
     println!("Tayyar: {}", out_path.display());
