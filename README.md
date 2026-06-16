@@ -21,7 +21,7 @@ har n mein bade {
     bol "mila: {n}"
 }
 
-salam("Ali")
+salam("Ahmad")
 ```
 
 Output:
@@ -29,7 +29,7 @@ Output:
 mila: 5
 mila: 8
 mila: 9
-Salam Ali! Kaise ho?
+Salam Ahmad! Kaise ho?
 ```
 
 ---
