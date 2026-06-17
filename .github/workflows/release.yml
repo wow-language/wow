@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: x86_64-linux
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
+            use_cross: true
+            archive: tar.gz
+
+          - name: aarch64-linux
+            os: ubuntu-22.04
+            target: aarch64-unknown-linux-musl
+            use_cross: true
+            archive: tar.gz
+
+          - name: x86_64-macos
+            os: macos-13
+            target: x86_64-apple-darwin
+            use_cross: false
+            archive: tar.gz
+
+          - name: aarch64-macos
+            os: macos-14
+            target: aarch64-apple-darwin
+            use_cross: false
+            archive: tar.gz
+
+          - name: x86_64-windows
+            os: windows-2022
+            target: x86_64-pc-windows-msvc
+            use_cross: false
+            archive: zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross
+        if: matrix.use_cross
+        run: cargo install cross --version 0.2.5
+
+      - name: Build (cross)
+        if: matrix.use_cross
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Build (cargo)
+        if: ${{ !matrix.use_cross }}
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Strip binary (Unix)
+        if: matrix.archive == 'tar.gz'
+        run: strip target/${{ matrix.target }}/release/wow
+
+      - name: Package (tar.gz)
+        if: matrix.archive == 'tar.gz'
+        run: |
+          ARCHIVE="wow-${{ github.ref_name }}-${{ matrix.name }}.tar.gz"
+          tar -czf "$ARCHIVE" -C "target/${{ matrix.target }}/release" wow
+          echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
+
+      - name: Package (zip)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $archive = "wow-${{ github.ref_name }}-${{ matrix.name }}.zip"
+          Compress-Archive -Path "target\${{ matrix.target }}\release\wow.exe" -DestinationPath $archive
+          "ARCHIVE=$archive" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-${{ matrix.name }}
+          path: ${{ env.ARCHIVE }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

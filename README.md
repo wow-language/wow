@@ -6,6 +6,36 @@
 
 ---
 
+## Installation
+
+### Linux / macOS
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/wow-language/wow/main/install.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/wow-language/wow/main/install.ps1 | iex
+```
+
+### With Rust installed
+
+```sh
+cargo install --git https://github.com/wow-language/wow
+```
+
+After installation, run any `.wow` file:
+
+```sh
+wow run myprog.wow
+wow build myprog.wow --target node
+wow --help
+```
+
+---
+
 ## What it looks like
 
 ```wow
