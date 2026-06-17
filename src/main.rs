@@ -9,6 +9,7 @@ use std::fs;
 use std::io::IsTerminal;
 use std::path::PathBuf;
 use std::process;
+use self_update;
 
 /// Block-letter "wow" + tagline, shown in `wow --help`. The و is the Urdu letter
 /// the language is named after.
@@ -32,7 +33,7 @@ const AUZAAR_ARDUINO_H: &str = include_str!("../runtime/auzaar/auzaar_arduino.h"
 /// wow — Roman Urdu programming language
 #[derive(Parser)]
 #[command(name = "wow")]
-#[command(version = "0.1.0")]
+#[command(version)]
 #[command(about = "Code likho. Wow bolo.")]
 #[command(before_help = BANNER)]
 #[command(arg_required_else_help = true)]
@@ -66,6 +67,9 @@ enum Command {
         #[arg(long, short, default_value = "c")]
         target: Target,
     },
+
+    /// Update wow to the latest version
+    Update,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq)]
@@ -88,6 +92,50 @@ fn main() {
         Command::Run { file, target } => {
             compile(&file, &target, true);
         }
+        Command::Update => {
+            do_update();
+        }
+    }
+}
+
+fn do_update() {
+    // Map the current compile-time platform to the asset name suffix used in releases.
+    let identifier = if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+        "aarch64-macos"
+    } else if cfg!(target_os = "macos") {
+        "x86_64-macos"
+    } else if cfg!(target_os = "linux") && cfg!(target_arch = "aarch64") {
+        "aarch64-linux"
+    } else if cfg!(target_os = "windows") {
+        "x86_64-windows"
+    } else {
+        "x86_64-linux"
+    };
+
+    let current = env!("CARGO_PKG_VERSION");
+    println!("Checking for updates... (current: v{current})");
+
+    let status = self_update::backends::github::Update::configure()
+        .repo_owner("wow-language")
+        .repo_name("wow")
+        .bin_name("wow")
+        .current_version(current)
+        .identifier(identifier)
+        .build()
+        .unwrap_or_else(|e| {
+            eprintln!("Ghalti: update check fail hua — {e}");
+            process::exit(1);
+        })
+        .update()
+        .unwrap_or_else(|e| {
+            eprintln!("Ghalti: update fail hua — {e}");
+            process::exit(1);
+        });
+
+    if status.updated() {
+        println!("wow update ho gaya! \x1b[1mv{}\x1b[0m", status.version());
+    } else {
+        println!("wow already latest hai: v{current}");
     }
 }
 

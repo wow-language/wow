@@ -97,6 +97,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -111,3 +113,28 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
+
+      - name: Update Homebrew formula
+        run: |
+          VERSION="${{ github.ref_name }}"
+          # Strip leading 'v' for the formula version field
+          VERSION_NUM="${VERSION#v}"
+
+          sha_x86_64_linux=$(sha256sum artifacts/wow-${VERSION}-x86_64-linux.tar.gz | awk '{print $1}')
+          sha_aarch64_linux=$(sha256sum artifacts/wow-${VERSION}-aarch64-linux.tar.gz | awk '{print $1}')
+          sha_x86_64_macos=$(sha256sum artifacts/wow-${VERSION}-x86_64-macos.tar.gz | awk '{print $1}')
+          sha_aarch64_macos=$(sha256sum artifacts/wow-${VERSION}-aarch64-macos.tar.gz | awk '{print $1}')
+
+          sed -i \
+            -e "s/version \".*\"/version \"${VERSION_NUM}\"/" \
+            -e "s/HOMEBREW_SHA256_X86_64_LINUX/${sha_x86_64_linux}/" \
+            -e "s/HOMEBREW_SHA256_AARCH64_LINUX/${sha_aarch64_linux}/" \
+            -e "s/HOMEBREW_SHA256_X86_64_MACOS/${sha_x86_64_macos}/" \
+            -e "s/HOMEBREW_SHA256_AARCH64_MACOS/${sha_aarch64_macos}/" \
+            Formula/wow.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/wow.rb
+          git diff --cached --quiet || git commit -m "chore: update Homebrew formula to ${VERSION}"
+          git push origin main
