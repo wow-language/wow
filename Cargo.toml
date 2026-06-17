@@ -1,6 +1,6 @@
 [package]
 name = "wow"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "The wow programming language compiler — Roman Urdu code for every platform"
 license = "MIT"
