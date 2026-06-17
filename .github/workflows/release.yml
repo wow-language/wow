@@ -68,7 +68,13 @@ jobs:
 
       - name: Strip binary (Unix)
         if: matrix.archive == 'tar.gz'
-        run: strip target/${{ matrix.target }}/release/wow
+        run: |
+          if ${{ matrix.use_cross }}; then
+            sudo apt-get install -y llvm
+            llvm-strip target/${{ matrix.target }}/release/wow
+          else
+            strip target/${{ matrix.target }}/release/wow
+          fi
 
       - name: Package (tar.gz)
         if: matrix.archive == 'tar.gz'
