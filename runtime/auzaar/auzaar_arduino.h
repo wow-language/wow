@@ -46,7 +46,7 @@ static inline double wow_random_number(double lo, double hi) {
 // ---- ESP32 WiFi + WebServer ----
 // These helpers are only compiled when building for an ESP32 board.
 // arduino-cli picks the right board automatically when you set board_fqbn.
-#ifdef ESP32
+#if defined(AUZAAR_ESP32) || defined(ESP32)
 #include <WiFi.h>
 #include <WebServer.h>
 
@@ -76,6 +76,6 @@ inline void wow_jawab_bhejo(double code, const String& content_type, const Strin
 inline String wow_wifi_ip() {
     return WiFi.localIP().toString();
 }
-#endif // ESP32
+#endif // AUZAAR_ESP32 / ESP32
 
 #endif // AUZAAR_ARDUINO_H
