@@ -48,7 +48,8 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     if !globals.is_empty() {
         for (name, value) in &globals {
             if seen_globals.insert((*name).clone()) {
-                out.push_str(&format!("double v_{name} = {};\n", gen_expr(value)));
+                let ty = global_type(value);
+                out.push_str(&format!("{ty} v_{name} = {};\n", gen_expr(value)));
             }
         }
         out.push('\n');
@@ -261,8 +262,37 @@ fn gen_call(name: &str, args: &[Spanned<Node>]) -> String {
         "pin_likho" => format!("digitalWrite((int)({}), {})", arg(&a, 0), arg(&a, 1)),
         "pin_parho" => format!("digitalRead((int)({}))", arg(&a, 0)),
         "intezar" => format!("delay((unsigned long)({}))", arg(&a, 0)),
+
+        // ESP32 WiFi / WebServer
+        "wifi_jodo" => format!("wow_wifi_jodo({}, {})", arg(&a, 0), arg(&a, 1)),
+        "wifi_ip" => "wow_wifi_ip()".into(),
+        "server_shuru" => format!("wow_server_shuru({})", arg(&a, 0)),
+        "server_parho" => "wow_server_parho()".into(),
+        "jawab_bhejo" => {
+            format!("wow_jawab_bhejo({}, {}, {})", arg(&a, 0), arg(&a, 1), arg(&a, 2))
+        }
+        // server_rasta("/", handler) — the handler must be a bare function name so
+        // we can wrap it in a void lambda that ESP32's WebServer expects.
+        "server_rasta" => {
+            let path = arg(&a, 0);
+            match args.get(1).map(|n| &n.node) {
+                Some(Node::Identifier(handler)) => {
+                    format!("_wow_server.on({path}, []() {{ f_{handler}(); }})")
+                }
+                _ => "/* server_rasta: dusra argument function ka naam hona chahiye */".into(),
+            }
+        }
+
         _ if is_arduino_math(name) => format!("wow_{name}({})", a.join(", ")),
         _ => format!("f_{name}({})", a.join(", ")),
+    }
+}
+
+fn global_type(value: &Spanned<Node>) -> &'static str {
+    match &value.node {
+        Node::Str(_) => "const char*",
+        Node::Interpolated(_) => "String",
+        _ => "double",
     }
 }
 

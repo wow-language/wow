@@ -1,0 +1,21 @@
+# esp32_server.wow — ESP32 par web server
+# Build karo: wow build esp32_server.wow --target arduino
+
+SSID = "apna_wifi"
+PASSWORD = "apna_password"
+
+banao ghar() {
+    jawab_bhejo(200, "text/html", "<h1>Salam Duniya!</h1><p>wow se likha gaya.</p>")
+}
+
+banao shuru() {
+    wifi_jodo(SSID, PASSWORD)
+    bol("Jud gaya! IP:")
+    bol(wifi_ip())
+    server_rasta("/", ghar)
+    server_shuru(80)
+}
+
+banao chalao() {
+    server_parho()
+}

@@ -260,7 +260,13 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
 }
 
 fn is_arduino_call(name: &str) -> bool {
-    matches!(name, "pin_set" | "pin_likho" | "pin_parho")
+    matches!(
+        name,
+        "pin_set" | "pin_likho" | "pin_parho"
+            | "wifi_jodo" | "wifi_ip"
+            | "server_rasta" | "server_shuru" | "server_parho"
+            | "jawab_bhejo"
+    )
 }
 
 /// auzaar tools too heavy for a microcontroller (everything except the math
