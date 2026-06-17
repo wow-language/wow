@@ -2,7 +2,7 @@ class Wow < Formula
   desc "Roman Urdu programming language compiler"
   homepage "https://github.com/wow-language/wow"
   license "MIT"
-  version "0.1.4"
+  version "0.1.5"
 
   on_macos do
     on_arm do
