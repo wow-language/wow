@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "The wow programming language compiler — Roman Urdu code for every platform"
 license = "MIT"
-repository = "https://github.com/wow-lang/wow"
+repository = "https://github.com/wow-language/wow"
 readme = "README.md"
 
 [[bin]]
@@ -12,14 +12,16 @@ name = "wow"
 path = "src/main.rs"
 
 [dependencies]
-# Lexer: define tokens as an annotated enum, very fast
 logos = "0.14"
-
-# Error messages: pointed, coloured, with source spans
 ariadne = "0.4"
-
-# CLI: wow build <file> --target <c|arduino|node>
 clap = { version = "4", features = ["derive"] }
+self_update = { version = "0.40", default-features = false, features = [
+    "archive-tar",
+    "archive-zip",
+    "compression-flate2",
+    "compression-zip-deflate",
+    "rustls",
+] }
 
 # Note: the parser is a hand-written recursive-descent parser (see src/parser.rs).
 # wow's grammar is newline-significant and reuses keywords (agar/warna also form
