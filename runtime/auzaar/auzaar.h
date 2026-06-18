@@ -56,7 +56,7 @@ static void wow_raise(const char *msg) {
  * The value type
  * ================================================================ */
 
-typedef enum { WOW_NULL, WOW_NUM, WOW_BOOL, WOW_STR, WOW_LIST } WowType;
+typedef enum { WOW_NULL, WOW_NUM, WOW_BOOL, WOW_STR, WOW_LIST, WOW_OBJ } WowType;
 
 struct WowValue;
 typedef struct WowValue WowValue;
@@ -67,6 +67,9 @@ typedef struct {
     int cap;
 } WowList;
 
+struct WowObj;
+typedef struct WowObj WowObj;
+
 struct WowValue {
     WowType type;
     union {
@@ -74,7 +77,15 @@ struct WowValue {
         int      boolean; /* WOW_BOOL */
         char    *str;     /* WOW_STR  — heap owned */
         WowList *list;    /* WOW_LIST — heap owned */
+        WowObj  *obj;     /* WOW_OBJ  — heap owned */
     } as;
+};
+
+typedef struct { char *key; WowValue val; } WowEntry;
+struct WowObj {
+    WowEntry *entries;
+    int len;
+    int cap;
 };
 
 /* ================================================================
@@ -131,6 +142,62 @@ static WowValue wow_list_lit(int n, WowValue *items) {
 }
 
 /* ================================================================
+ * Object constructors and access
+ * ================================================================ */
+
+static WowValue wow_obj_new(void) {
+    WowObj *o = (WowObj *)malloc(sizeof(WowObj));
+    o->len = 0; o->cap = 4;
+    o->entries = (WowEntry *)malloc(sizeof(WowEntry) * o->cap);
+    WowValue v; v.type = WOW_OBJ; v.as.obj = o; return v;
+}
+
+/* upsert: add new key or overwrite existing */
+static void wow_obj_set(WowValue obj, const char *key, WowValue val) {
+    if (obj.type != WOW_OBJ) return;
+    WowObj *o = obj.as.obj;
+    for (int i = 0; i < o->len; i++) {
+        if (strcmp(o->entries[i].key, key) == 0) { o->entries[i].val = val; return; }
+    }
+    if (o->len == o->cap) {
+        o->cap *= 2;
+        o->entries = (WowEntry *)realloc(o->entries, sizeof(WowEntry) * o->cap);
+    }
+    o->entries[o->len].key = wow_strdup(key);
+    o->entries[o->len].val = val;
+    o->len++;
+}
+
+/* get — crashes with wow_raise if obj is not an object or key is missing */
+static WowValue wow_obj_get(WowValue obj, const char *key) {
+    if (obj.type == WOW_OBJ) {
+        WowObj *o = obj.as.obj;
+        for (int i = 0; i < o->len; i++)
+            if (strcmp(o->entries[i].key, key) == 0) return o->entries[i].val;
+    }
+    char msg[128];
+    snprintf(msg, sizeof(msg), "'%s' key nahi mila", key);
+    wow_raise(msg);
+    return wow_null();
+}
+
+/* safe get — returns khali if obj is not an object or key is missing */
+static WowValue wow_safe_get(WowValue obj, const char *key) {
+    if (obj.type != WOW_OBJ) return wow_null();
+    WowObj *o = obj.as.obj;
+    for (int i = 0; i < o->len; i++)
+        if (strcmp(o->entries[i].key, key) == 0) return o->entries[i].val;
+    return wow_null();
+}
+
+/* build an object literal from parallel key/value arrays */
+static WowValue wow_obj_lit(int n, const char **keys, WowValue *vals) {
+    WowValue obj = wow_obj_new();
+    for (int i = 0; i < n; i++) wow_obj_set(obj, keys[i], vals[i]);
+    return obj;
+}
+
+/* ================================================================
  * Coercions
  * ================================================================ */
 
@@ -150,6 +217,7 @@ static int wow_truthy(WowValue v) {
         case WOW_NUM:  return v.as.num != 0.0;
         case WOW_STR:  return v.as.str[0] != '\0';
         case WOW_LIST: return v.as.list->len != 0;
+        case WOW_OBJ:  return v.as.obj->len != 0;
     }
     return 0;
 }
@@ -189,6 +257,39 @@ static WowValue wow_to_str(WowValue v) {
             }
             buf = (char *)realloc(buf, len + 2);
             buf[len++] = ']'; buf[len] = '\0';
+            return wow_str_owned(buf);
+        }
+        case WOW_OBJ: {
+            WowObj *o = v.as.obj;
+            size_t cap = 4, len = 0;
+            char *buf = (char *)malloc(cap);
+            buf[len++] = '{';
+            for (int i = 0; i < o->len; i++) {
+                const char *sep = i > 0 ? ", " : " ";
+                size_t sepl = strlen(sep);
+                buf = (char *)realloc(buf, len + sepl + 1);
+                memcpy(buf + len, sep, sepl); len += sepl;
+                /* key */
+                size_t kl = strlen(o->entries[i].key);
+                buf = (char *)realloc(buf, len + kl + 3);
+                memcpy(buf + len, o->entries[i].key, kl); len += kl;
+                buf[len++] = ':'; buf[len++] = ' ';
+                /* value — strings get quotes, others print as-is */
+                WowValue sv = wow_to_str(o->entries[i].val);
+                size_t vl = strlen(sv.as.str);
+                if (o->entries[i].val.type == WOW_STR) {
+                    buf = (char *)realloc(buf, len + vl + 3);
+                    buf[len++] = '"';
+                    memcpy(buf + len, sv.as.str, vl); len += vl;
+                    buf[len++] = '"';
+                } else {
+                    buf = (char *)realloc(buf, len + vl + 1);
+                    memcpy(buf + len, sv.as.str, vl); len += vl;
+                }
+            }
+            buf = (char *)realloc(buf, len + 3);
+            if (o->len > 0) buf[len++] = ' ';
+            buf[len++] = '}'; buf[len] = '\0';
             return wow_str_owned(buf);
         }
     }
@@ -269,6 +370,7 @@ static int wow_equal(WowValue a, WowValue b) {
         case WOW_BOOL: return a.as.boolean == b.as.boolean;
         case WOW_STR:  return strcmp(a.as.str, b.as.str) == 0;
         case WOW_LIST: return a.as.list == b.as.list;
+        case WOW_OBJ:  return a.as.obj  == b.as.obj;
     }
     return 0;
 }
@@ -281,7 +383,7 @@ static WowValue wow_gt(WowValue a, WowValue b)  { return wow_bool(wow_as_num(a) 
 static WowValue wow_gte(WowValue a, WowValue b) { return wow_bool(wow_as_num(a) >= wow_as_num(b)); }
 
 static WowValue wow_and(WowValue a, WowValue b) { return wow_bool(wow_truthy(a) && wow_truthy(b)); }
-static WowValue wow_or(WowValue a, WowValue b)  { return wow_bool(wow_truthy(a) || wow_truthy(b)); }
+static WowValue wow_or(WowValue a, WowValue b)  { return wow_truthy(a) ? a : b; }
 static WowValue wow_not(WowValue a)             { return wow_bool(!wow_truthy(a)); }
 
 /* ================================================================
@@ -558,6 +660,46 @@ static WowValue wow_guroh(WowValue list, WowValue (*fn)(WowValue)) {
             wow_list_push(out, pair);
         }
     }
+    return out;
+}
+
+/* ================================================================
+ * auzaar — objects
+ * ================================================================ */
+
+/* mafta — list of keys */
+static WowValue wow_mafta(WowValue obj) {
+    WowValue out = wow_list_new();
+    if (obj.type == WOW_OBJ)
+        for (int i = 0; i < obj.as.obj->len; i++) wow_list_push(out, wow_str(obj.as.obj->entries[i].key));
+    return out;
+}
+
+/* qeemtain — list of values */
+static WowValue wow_qeemtain(WowValue obj) {
+    WowValue out = wow_list_new();
+    if (obj.type == WOW_OBJ)
+        for (int i = 0; i < obj.as.obj->len; i++) wow_list_push(out, obj.as.obj->entries[i].val);
+    return out;
+}
+
+/* key_hai — bool: does key exist? */
+static WowValue wow_key_hai(WowValue obj, WowValue key) {
+    if (obj.type != WOW_OBJ) return wow_bool(0);
+    const char *k = wow_to_str(key).as.str;
+    for (int i = 0; i < obj.as.obj->len; i++)
+        if (strcmp(obj.as.obj->entries[i].key, k) == 0) return wow_bool(1);
+    return wow_bool(0);
+}
+
+/* hata — new object without the given key */
+static WowValue wow_hata(WowValue obj, WowValue key) {
+    WowValue out = wow_obj_new();
+    if (obj.type != WOW_OBJ) return out;
+    const char *k = wow_to_str(key).as.str;
+    for (int i = 0; i < obj.as.obj->len; i++)
+        if (strcmp(obj.as.obj->entries[i].key, k) != 0)
+            wow_obj_set(out, obj.as.obj->entries[i].key, obj.as.obj->entries[i].val);
     return out;
 }
 
