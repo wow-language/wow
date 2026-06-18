@@ -126,6 +126,18 @@ fn walk(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>) {
             walk(else_val, target, errors);
         }
         Node::List(items) => walk_all(items, target, errors),
+        Node::Object { pairs } => {
+            for (_, val) in pairs {
+                walk(val, target, errors);
+            }
+        }
+        Node::PropAccess { object, .. } | Node::SafePropAccess { object, .. } => {
+            walk(object, target, errors);
+        }
+        Node::PropAssign { object, value, .. } => {
+            walk(object, target, errors);
+            walk(value, target, errors);
+        }
         Node::Interpolated(parts) => {
             for part in parts {
                 if let InterpolPart::Expr(e) = part {
@@ -176,12 +188,6 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
                 "'lao' abhi sirf Node par hai",
                 "library import abhi desktop (C) par nahi",
                 "abhi --target node istemaal karein",
-            ),
-            Node::SafeAccess { .. } => flag(
-                errors, span,
-                "'?.' abhi C par nahi",
-                "safe access abhi desktop (C) par nahi aaya",
-                "agle phase mein aayega",
             ),
             _ => {}
         },
@@ -236,6 +242,15 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
                 "safe access abhi Arduino par nahi",
                 "agle phase mein aayega",
             ),
+            Node::Object { .. }
+            | Node::PropAccess { .. }
+            | Node::PropAssign { .. }
+            | Node::SafePropAccess { .. } => flag(
+                errors, span,
+                "Arduino par objects nahi",
+                "objects Arduino ki memory mein nahi aate",
+                "C ya node target par chalayein",
+            ),
             _ => {}
         },
 
@@ -279,6 +294,7 @@ fn is_collection_tool(name: &str) -> bool {
             | "pehla" | "aakhri" | "phento" | "guroh" | "silsila"
             | "toro" | "milao" | "saaf" | "tabdeel" | "lambai"
             | "bara_likho" | "chota_likho"
+            | "mafta" | "qeemtain" | "key_hai" | "hata"
     )
 }
 

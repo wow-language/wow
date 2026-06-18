@@ -35,6 +35,9 @@ pub enum Token {
     #[token("koshish")] Koshish,
     #[token("pakro")]   Pakro,
     #[token("pucho")]   Pucho,
+    #[token("ka")]      Ka,
+    #[token("ki")]      Ki,
+    #[token("kay")]     Kay,
 
     // ----------------------------------------------------------------
     // Keywords — Arduino target
@@ -80,6 +83,7 @@ pub enum Token {
     // ----------------------------------------------------------------
     // Symbols
     // ----------------------------------------------------------------
+    #[token(":")]   Colon,
     #[token("{")]   LBrace,
     #[token("}")]   RBrace,
     #[token("(")]   LParen,

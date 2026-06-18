@@ -70,6 +70,30 @@ output identical across platforms. Read a pair with `pehla` (key) and `aakhri`
 | `bara_likho(text)` | convert to uppercase |
 | `chota_likho(text)` | convert to lowercase |
 
+## Objects
+
+These functions work with object (structured data) values. They are available on C and Node
+targets. On Arduino, objects are not supported (board memory is too tight).
+
+| Function | Does what | C | Node | Arduino |
+|---|---|---|---|---|
+| `mafta(obj)` | list of all keys | ✓ | ✓ | ✗ |
+| `qeemtain(obj)` | list of all values | ✓ | ✓ | ✗ |
+| `key_hai(obj, key)` | `sahi` if key exists in object | ✓ | ✓ | ✗ |
+| `hata(obj, key)` | new object without the given key | ✓ | ✓ | ✗ |
+
+```
+shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
+
+bol mafta(shaks)           # → ["naam", "umar", "shahar"]
+bol qeemtain(shaks)        # → ["Ahmad", 14, "Karachi"]
+bol key_hai(shaks, "naam") # → sahi
+bol key_hai(shaks, "adres")# → ghalat
+
+naya = hata(shaks, "umar")
+bol mafta(naya)            # → ["naam", "shahar"]
+```
+
 ## Math
 
 Plain English names are used here because kids already know these from math class.

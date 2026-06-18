@@ -285,7 +285,8 @@ impl Parser {
                     | Token::Lte | Token::Gt | Token::Gte | Token::Aur | Token::Ya
                     | Token::Phir | Token::Agar | Token::Baar | Token::Comma | Token::Dot
                     | Token::SafeDot | Token::LBracket | Token::Newline | Token::RBrace
-                    | Token::RParen | Token::RBracket
+                    | Token::RParen | Token::RBracket | Token::Ka | Token::Ki | Token::Kay
+                    | Token::NullAssign
             ),
         }
     }
@@ -310,6 +311,47 @@ impl Parser {
                 let value = self.expr();
                 let span = start..value.span.end;
                 return Spanned::new(Node::Assign { name, value: Box::new(value) }, span);
+            }
+            // `x ?= val`  →  `x = x ya val`
+            if self.is(&Token::NullAssign) {
+                let name = name.clone();
+                let e_span = e.span.clone();
+                self.advance();
+                let val = self.expr();
+                let span = start..val.span.end;
+                let ident = Spanned::new(Node::Identifier(name.clone()), e_span.clone());
+                let or_node = Spanned::new(
+                    Node::BinOp { op: BinOp::Or, left: Box::new(ident), right: Box::new(val) },
+                    e_span.start..span.end,
+                );
+                return Spanned::new(Node::Assign { name, value: Box::new(or_node) }, span);
+            }
+        }
+
+        // `shaks.prop = val` — property assignment
+        if let Node::PropAccess { object, prop } = &e.node {
+            if self.is(&Token::Assign) {
+                let object = object.clone();
+                let prop = prop.clone();
+                self.advance();
+                let value = self.expr();
+                let span = start..value.span.end;
+                return Spanned::new(Node::PropAssign { object, prop, value: Box::new(value) }, span);
+            }
+            // `shaks.prop ?= val`  →  `shaks.prop = shaks.prop ya val`
+            if self.is(&Token::NullAssign) {
+                let object = object.clone();
+                let prop = prop.clone();
+                let e_span = e.span.clone();
+                self.advance();
+                let val = self.expr();
+                let span = start..val.span.end;
+                let current = Spanned::new(Node::SafePropAccess { object: object.clone(), prop: prop.clone() }, e_span.clone());
+                let or_node = Spanned::new(
+                    Node::BinOp { op: BinOp::Or, left: Box::new(current), right: Box::new(val) },
+                    e_span.start..span.end,
+                );
+                return Spanned::new(Node::PropAssign { object, prop, value: Box::new(or_node) }, span);
             }
         }
 
@@ -667,19 +709,31 @@ impl Parser {
                 }
                 break;
             }
-            // safe access: user?.profile?.naam
+            // .prop — regular property access
+            if self.is(&Token::Dot) {
+                let start = e.span.start;
+                self.advance();
+                let prop = self.ident();
+                let end = self.prev_span().end;
+                e = Spanned::new(Node::PropAccess { object: Box::new(e), prop }, start..end);
+                continue;
+            }
+            // ?.prop — safe property access
             if self.is(&Token::SafeDot) {
                 let start = e.span.start;
-                let mut parts = match &e.node {
-                    Node::Identifier(name) => vec![name.clone()],
-                    _ => self.err(e.span.clone(), "?. sirf naam ke baad", "yahan ek naam hona chahiye", None),
-                };
-                while self.is(&Token::SafeDot) {
-                    self.advance();
-                    parts.push(self.ident());
-                }
-                let span = start..self.prev_span().end;
-                e = Spanned::new(Node::SafeAccess { parts }, span);
+                self.advance();
+                let prop = self.ident();
+                let end = self.prev_span().end;
+                e = Spanned::new(Node::SafePropAccess { object: Box::new(e), prop }, start..end);
+                continue;
+            }
+            // ka / ki / kay — safe possessive access
+            if matches!(self.peek(), Some(Token::Ka) | Some(Token::Ki) | Some(Token::Kay)) {
+                let start = e.span.start;
+                self.advance();
+                let prop = self.ident();
+                let end = self.prev_span().end;
+                e = Spanned::new(Node::SafePropAccess { object: Box::new(e), prop }, start..end);
                 continue;
             }
             break;
@@ -724,6 +778,7 @@ impl Parser {
                 e
             }
             Some(Token::LBracket) => self.list_literal(),
+            Some(Token::LBrace) => self.object_literal(),
             Some(Token::Pucho) => {
                 self.advance();
                 let prompt = self.unary();
@@ -778,6 +833,41 @@ impl Parser {
         self.expect_rbracket();
         let span = start..self.prev_span().end;
         Spanned::new(Node::List(items), span)
+    }
+
+    fn object_literal(&mut self) -> Spanned<Node> {
+        let start = self.cur_span().start;
+        self.advance(); // {
+        self.skip_newlines();
+        let mut pairs = Vec::new();
+        while !self.is(&Token::RBrace) {
+            if self.at_end() {
+                self.err(
+                    self.cur_span(),
+                    "Object band nahi hua",
+                    "yahan '}' chahiye",
+                    Some("har '{' ke liye ek '}' zaroori hai"),
+                );
+            }
+            let key = self.ident();
+            self.expect_simple(
+                &Token::Colon,
+                "':' chahiye",
+                "key ke baad ':' likhein",
+                Some("misaal: { naam: \"Ahmad\", umar: 10 }"),
+            );
+            self.skip_newlines();
+            let val = self.expr();
+            pairs.push((key, val));
+            self.skip_newlines();
+            if self.is(&Token::Comma) {
+                self.advance();
+                self.skip_newlines();
+            }
+        }
+        self.advance(); // }
+        let span = start..self.prev_span().end;
+        Spanned::new(Node::Object { pairs }, span)
     }
 
     /// Comma-separated argument expressions; caller consumes the closing ')'.

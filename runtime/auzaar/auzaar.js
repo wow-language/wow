@@ -9,11 +9,16 @@
 // These mirror the C runtime so a program prints the same on every target.
 // ----------------------------------------------------------------
 
-// wow-style string form: 5 not 5.0, sahi/ghalat, khali, [a, b, c]
+// wow-style string form: 5 not 5.0, sahi/ghalat, khali, [a, b, c], { k: v }
 const fmt = (v) => {
     if (v === null || v === undefined) return 'khali';
     if (typeof v === 'boolean') return v ? 'sahi' : 'ghalat';
     if (Array.isArray(v)) return '[' + v.map(fmt).join(', ') + ']';
+    if (typeof v === 'object') {
+        const fmtObjVal = (val) => typeof val === 'string' ? `"${val}"` : fmt(val);
+        const pairs = Object.entries(v).map(([k, val]) => `${k}: ${fmtObjVal(val)}`);
+        return '{ ' + pairs.join(', ') + ' }';
+    }
     return String(v);
 };
 
@@ -50,6 +55,7 @@ const truthy = (v) => {
     if (typeof v === 'number') return v !== 0;
     if (typeof v === 'string') return v.length > 0;
     if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === 'object') return Object.keys(v).length > 0;
     return true;
 };
 
@@ -122,6 +128,15 @@ const silsila    = (start, end) => {
 };
 
 // ----------------------------------------------------------------
+// Objects
+// ----------------------------------------------------------------
+
+const mafta      = (obj) => Object.keys(obj);
+const qeemtain   = (obj) => Object.values(obj);
+const key_hai    = (obj, key) => key in obj ? true : false;
+const hata       = (obj, key) => { const r = { ...obj }; delete r[key]; return r; };
+
+// ----------------------------------------------------------------
 // Strings
 // ----------------------------------------------------------------
 
@@ -159,6 +174,8 @@ module.exports = {
     guroh, silsila,
     // strings
     toro, milao, saaf, tabdeel, lambai, bara_likho, chota_likho,
+    // objects
+    mafta, qeemtain, key_hai, hata,
     // math
     random, random_number, round, round_up, round_down,
     square_root, power, absolute,

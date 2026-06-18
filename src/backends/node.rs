@@ -17,7 +17,9 @@ pub fn generate(ast: &Spanned<Node>) -> String {
     out.push_str("        tarteeb, ulta, alag, flatten, tukre, pehla, aakhri, phento,\n");
     out.push_str("        guroh, silsila, toro, milao, saaf, tabdeel, lambai,\n");
     out.push_str("        bara_likho, chota_likho, random, random_number,\n");
-    out.push_str("        round, round_up, round_down, square_root, power, absolute } = _auzaar;\n\n");
+    out.push_str("        round, round_up, round_down, square_root, power, absolute,\n");
+    out.push_str("        mafta, qeemtain, key_hai, hata } = _auzaar;\n");
+    out.push_str("const _ya = (a, b) => truthy(a) ? a : b;\n\n");
 
     if let Node::Program(stmts) = &ast.node {
         // Wrap the program so an uncaught wow error prints a friendly Roman Urdu
@@ -88,6 +90,10 @@ fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
         Node::Assign { name, value } => {
             // `var` is function-scoped and re-declarable, matching wow scoping.
             format!("{pad}var v_{name} = {};\n", gen_expr(value))
+        }
+
+        Node::PropAssign { object, prop, value } => {
+            format!("{pad}{}.{} = {};\n", gen_expr(object), prop, gen_expr(value))
         }
 
         Node::Bol(e) => format!("{pad}bol({});\n", gen_expr(e)),
@@ -236,6 +242,24 @@ fn gen_expr(node: &Spanned<Node>) -> String {
             format!("[{}]", vals.join(", "))
         }
 
+        Node::Object { pairs } => {
+            if pairs.is_empty() {
+                return "({})".to_string();
+            }
+            let kvs: Vec<String> = pairs.iter()
+                .map(|(k, v)| format!("{}: {}", k, gen_expr(v)))
+                .collect();
+            format!("({{{}}})", kvs.join(", "))
+        }
+
+        Node::PropAccess { object, prop } => {
+            format!("{}.{}", gen_expr(object), prop)
+        }
+
+        Node::SafePropAccess { object, prop } => {
+            format!("{}?.{}", gen_expr(object), prop)
+        }
+
         Node::Negate(e) => format!("(-({}))", gen_expr(e)),
         Node::UnaryNot(e) => format!("(!truthy({}))", gen_expr(e)),
 
@@ -244,7 +268,7 @@ fn gen_expr(node: &Spanned<Node>) -> String {
             let r = gen_expr(right);
             match op {
                 BinOp::And => format!("(truthy({l}) && truthy({r}))"),
-                BinOp::Or => format!("(truthy({l}) || truthy({r}))"),
+                BinOp::Or => format!("_ya({l}, {r})"),
                 // route through helpers that raise on divide-by-zero
                 BinOp::Div => format!("taqseem({l}, {r})"),
                 BinOp::Mod => format!("baaqi({l}, {r})"),
@@ -322,6 +346,7 @@ fn is_builtin(name: &str) -> bool {
             | "shamil" | "alag" | "silsila" | "tukre" | "flatten" | "tarteeb"
             | "badlo" | "chuno" | "dhundo" | "joro" | "guroh" | "phento"
             | "intezar"
+            | "mafta" | "qeemtain" | "key_hai" | "hata"
     )
 }
 

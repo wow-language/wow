@@ -1,0 +1,37 @@
+# misaal: objects / structured data
+# wow run examples/shaks.wow
+
+shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
+
+bol "Salam {shaks.naam}!"
+bol "Umar: {shaks ka umar}"
+
+shaks.umar = 15
+bol "Agla saal: {shaks.umar}"
+
+# Safe access — khali agar key nahi
+bol shaks ka email
+
+# Null-coalescing assign
+shaks.email ?= "ahmad@example.com"
+bol shaks.email
+
+# Nested objects
+shaks.adres = { shahar: "Karachi", gali: "Model Town" }
+bol shaks.adres.shahar
+bol shaks ka adres ka gali
+
+# List of objects
+log = [
+    { naam: "Ahmad", umar: 10 },
+    { naam: "Sara", umar: 12 },
+]
+har p mein log {
+    bol "{p.naam}: {p ka umar} saal"
+}
+
+# Object auzaar
+bol mafta(shaks)
+bol qeemtain(shaks)
+bol key_hai(shaks, "naam")
+bol key_hai(shaks, "password")
