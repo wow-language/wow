@@ -305,9 +305,31 @@ What works today:
 - Misspell a keyword and the compiler suggests the fix (`agr` → "kya aap ka matlab 'agar' tha?")
 - Clear, pointed compile errors in Roman Urdu
 
-Coming next, per [the plan](docs): safe access (`?.`) once there are objects to
-use it on, and the browser playground. Using an unsupported construct today
-produces a friendly "not on this target yet" error.
+**Objects** — structured data with dot access and Urdu possessive safe access:
+
+```wow
+shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
+
+bol shaks.naam            # Ahmad   — regular access (crashes if khali)
+bol shaks ka umar         # 14      — safe: ka / ki / kay all work
+bol shaks ki shahar       # Karachi — pick whichever sounds right for the noun
+bol shaks ka email        # khali   — missing key, no crash
+
+shaks.umar = 15           # update a property
+shaks.email ?= "default"  # only assign if currently khali
+
+# Lists of objects — a very common pattern
+log = [
+    { naam: "Ahmad", umar: 10 },
+    { naam: "Sara", umar: 12 },
+]
+har p mein log {
+    bol "{p.naam}: {p ka umar} saal"
+}
+```
+
+Object auzaar: `mafta(obj)` (keys), `qeemtain(obj)` (values), `key_hai(obj, key)`, `hata(obj, key)`.
+Objects are available on C and Node targets; Arduino gives a helpful "memory kam hai" error.
 
 A couple of design notes for the curious:
 

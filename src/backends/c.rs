@@ -139,6 +139,14 @@ impl CGen {
             Node::Assign { name, value } => {
                 format!("{pad}v_{name} = {};\n", self.gen_expr(value))
             }
+            Node::PropAssign { object, prop, value } => {
+                format!(
+                    "{pad}wow_obj_set({}, \"{}\", {});\n",
+                    self.gen_expr(object),
+                    escape_c(prop),
+                    self.gen_expr(value)
+                )
+            }
             Node::Bol(e) => format!("{pad}wow_print({});\n", self.gen_expr(e)),
             // Returning/breaking out of a koshish body must unwind the handler
             // stack first; _hbase is the function's level, the loop var the loop's.
@@ -320,6 +328,33 @@ impl CGen {
                     let vals: Vec<String> = items.iter().map(|it| self.gen_expr(it)).collect();
                     format!("wow_list_lit({}, (WowValue[]){{{}}})", items.len(), vals.join(", "))
                 }
+            }
+
+            Node::Object { pairs } => {
+                if pairs.is_empty() {
+                    "wow_obj_new()".to_string()
+                } else {
+                    let keys: Vec<String> = pairs.iter()
+                        .map(|(k, _)| format!("\"{}\"", escape_c(k)))
+                        .collect();
+                    let vals: Vec<String> = pairs.iter()
+                        .map(|(_, v)| self.gen_expr(v))
+                        .collect();
+                    format!(
+                        "wow_obj_lit({}, (const char*[]){{{}}}, (WowValue[]){{{}}})",
+                        pairs.len(),
+                        keys.join(", "),
+                        vals.join(", ")
+                    )
+                }
+            }
+
+            Node::PropAccess { object, prop } => {
+                format!("wow_obj_get({}, \"{}\")", self.gen_expr(object), escape_c(prop))
+            }
+
+            Node::SafePropAccess { object, prop } => {
+                format!("wow_safe_get({}, \"{}\")", self.gen_expr(object), escape_c(prop))
             }
 
             Node::Negate(e) => format!("wow_neg({})", self.gen_expr(e)),
@@ -557,6 +592,8 @@ fn is_builtin(name: &str) -> bool {
             | "badlo" | "chuno" | "dhundo" | "guroh" | "joro"
         // shared
             | "intezar"
+        // objects
+            | "mafta" | "qeemtain" | "key_hai" | "hata"
     )
 }
 

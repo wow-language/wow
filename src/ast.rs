@@ -25,6 +25,8 @@ pub enum Node {
     Null,          // khali
     Identifier(String),
     List(Vec<Spanned<Node>>),
+    /// { naam: "Ahmad", umar: 10 }
+    Object { pairs: Vec<(String, Spanned<Node>)> },
 
     // ----------------------------------------------------------------
     // Statements
@@ -146,8 +148,16 @@ pub enum Node {
         else_val: Box<Spanned<Node>>,
     },
 
-    /// safe access: user?.profile?.naam
-    // consumed once safe access lands on a backend (later phase)
+    /// shaks.naam  — regular property access, crashes if not an object
+    PropAccess { object: Box<Spanned<Node>>, prop: String },
+
+    /// shaks.naam = "Ahmad"  — property mutation
+    PropAssign { object: Box<Spanned<Node>>, prop: String, value: Box<Spanned<Node>> },
+
+    /// shaks ka naam / ki naam / kay naam / shaks?.naam — safe access, returns khali if null
+    SafePropAccess { object: Box<Spanned<Node>>, prop: String },
+
+    /// safe access: user?.profile?.naam  (legacy form — parser now emits SafePropAccess)
     #[allow(dead_code)]
     SafeAccess {
         parts: Vec<String>,

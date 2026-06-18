@@ -74,6 +74,44 @@ On the Node target, `banao shuru()` is also allowed: it holds startup code that
 runs once when the program begins (on Arduino the same `shuru` maps to `setup()`).
 The Express app behind `server` / `rasta` / `jawab` is created for you.
 
+## Object access keywords
+
+These three keywords are safe property access operators (return `khali` instead of crashing
+if the object or key doesn't exist). They are grammatically equivalent — pick whichever
+sounds right for the noun.
+
+| Keyword | Grammatical use | Example |
+|---|---|---|
+| `ka` | masculine singular | `shaks ka naam` ("person's name") |
+| `ki` | feminine | `kitaab ki title` ("book's title") |
+| `kay` | masculine plural / general | `bachay kay naam` ("child's name") |
+
+All three map to `?.` in the Node backend and to `wow_safe_get()` in C.
+Objects are not supported on the Arduino target (memory too tight).
+
+### Object literal syntax
+
+```
+shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
+```
+
+Keys are plain identifiers. Values are any wow expression. Objects are not supported on Arduino.
+
+### Property access
+
+| Style | Syntax | Behaviour |
+|---|---|---|
+| Regular dot | `shaks.naam` | Returns value; crashes if `shaks` is `khali` |
+| Safe possessive | `shaks ka naam` | Returns `khali` if `shaks` is `khali` or key missing |
+| Safe dot | `shaks?.naam` | Same as `ka/ki/kay` |
+
+### Property assignment
+
+```
+shaks.umar = 15          # regular assignment
+shaks.email ?= "default" # only assigns if email is khali
+```
+
 ## Shared but different
 
 These keywords exist on all targets but produce different output.
