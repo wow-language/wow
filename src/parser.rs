@@ -286,7 +286,7 @@ impl Parser {
                     | Token::Phir | Token::Agar | Token::Baar | Token::Comma | Token::Dot
                     | Token::SafeDot | Token::LBracket | Token::Newline | Token::RBrace
                     | Token::RParen | Token::RBracket | Token::Ka | Token::Ki | Token::Kay
-                    | Token::NullAssign
+                    | Token::NullAssign | Token::Se
             ),
         }
     }
@@ -301,6 +301,18 @@ impl Parser {
             let body = self.block();
             let span = start..self.prev_span().end;
             return Spanned::new(Node::Baar { times: Box::new(e), body }, span);
+        }
+
+        // `1 se 5 tak har i { ... }` — range loop (from expr, se, to expr, tak, har, var)
+        if self.is(&Token::Se) {
+            self.advance(); // se
+            let to = self.expr();
+            self.expect_simple(&Token::Tak, "'tak' chahiye", "range mein 'tak' likhein", Some("misaal: 1 se 5 tak har i { }"));
+            self.expect_simple(&Token::Har, "'har' chahiye", "'tak' ke baad 'har' likhein", Some("misaal: 1 se 5 tak har i { }"));
+            let var = self.ident();
+            let body = self.block();
+            let span = start..self.prev_span().end;
+            return Spanned::new(Node::HarRange { var, from: Box::new(e), to: Box::new(to), body }, span);
         }
 
         // `x = ...` — assignment to a bare identifier
@@ -394,25 +406,13 @@ impl Parser {
     fn har_stmt(&mut self) -> Spanned<Node> {
         let start = self.cur_span().start;
         self.advance(); // har
+        // `har phal mein p { ... }` — collection first, variable after mein
+        let list = self.expr();
+        self.expect_simple(&Token::Mein, "'mein' chahiye", "collection ke baad 'mein' likhein", Some("misaal: har phal mein p { }"));
         let var = self.ident();
-
-        if self.is(&Token::Mein) {
-            // har item mein list { ... }
-            self.advance();
-            let list = self.expr();
-            let body = self.block();
-            let span = start..self.prev_span().end;
-            Spanned::new(Node::HarList { var, list: Box::new(list), body }, span)
-        } else {
-            // har i 0 se 10 tak { ... }
-            let from = self.expr();
-            self.expect_simple(&Token::Se, "'se' chahiye", "range mein 'se' likhein", Some("misaal: har i 0 se 10 tak { }"));
-            let to = self.expr();
-            self.expect_simple(&Token::Tak, "'tak' chahiye", "range mein 'tak' likhein", Some("misaal: har i 0 se 10 tak { }"));
-            let body = self.block();
-            let span = start..self.prev_span().end;
-            Spanned::new(Node::HarRange { var, from: Box::new(from), to: Box::new(to), body }, span)
-        }
+        let body = self.block();
+        let span = start..self.prev_span().end;
+        Spanned::new(Node::HarList { var, list: Box::new(list), body }, span)
     }
 
     fn banao_stmt(&mut self) -> Spanned<Node> {

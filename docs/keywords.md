@@ -13,10 +13,10 @@ Do not change a spelling once the language is in use — it breaks existing code
 | `agar` | if | |
 | `warna` | otherwise / else | pairs with agar |
 | `warna agar` | else if | two words, treated as one construct |
-| `har` | each | loop keyword |
-| `mein` | in | `har item mein list` |
-| `se` | from | `har i 0 se 10 tak` |
-| `tak` | to / until | `har i 0 se 10 tak` |
+| `har` | each | loop keyword — `har list mein item { }` |
+| `mein` | in | `har phal mein p { }` — collection comes first |
+| `se` | from | `1 se 5 tak har i { }` — range loops start with the range |
+| `tak` | to / until | `1 se 5 tak har i { }` |
 | `baar` | times | `3 baar { }` |
 | `jabtak` | as long as / while | |
 | `roko` | stop | break |
@@ -37,8 +37,9 @@ Do not change a spelling once the language is in use — it breaks existing code
 
 ## Semantics notes
 
-- **Ranges are inclusive.** `har i 1 se 5 tak { }` runs the body for i = 1, 2, 3, 4, 5.
-  This reads the way a beginner says it out loud ("ek se panch tak").
+- **Ranges are inclusive.** `1 se 5 tak har i { }` runs the body for i = 1, 2, 3, 4, 5.
+  The range comes first — "1 se 5 tak" — then `har i` names the counter. This mirrors how
+  you say it out loud: "ek se paanch tak, har i ke liye".
 - **Newlines end statements**, except a `phir` chain may continue on the next line.
 - **Variables are function-scoped.** A variable first assigned inside an `agar` or a
   loop is still visible after it, like in everyday scripting languages.
