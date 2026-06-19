@@ -8,7 +8,7 @@ Do not change a spelling once the language is in use — it breaks existing code
 
 | Keyword | Meaning | Notes |
 |---|---|---|
-| `bol` | say / print | 3 letters, used constantly, kept short on purpose |
+| `likho` | write / print | "write" — we are writing output to the screen, not speaking |
 | `rakho` | put / keep | optional variable declaration; plain `x = 5` also works |
 | `agar` | if | |
 | `warna` | otherwise / else | pairs with agar |
@@ -119,5 +119,5 @@ These keywords exist on all targets but produce different output.
 
 | Keyword | C | Arduino | Node |
 |---|---|---|---|
-| `bol` | `printf` | `Serial.println` | `console.log` |
+| `likho` | `printf` | `Serial.println` | `console.log` |
 | `intezar` | `sleep` (POSIX) | `delay` | `setTimeout` |

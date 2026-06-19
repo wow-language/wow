@@ -4,7 +4,7 @@
 lao express
 
 banao shuru() {
-    bol "Server shuru ho raha hai port 3000 par..."
+    likho "Server shuru ho raha hai port 3000 par..."
     server(3000)
 }
 

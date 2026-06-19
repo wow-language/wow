@@ -1,17 +1,17 @@
-#ifndef AUZAAR_ARDUINO_H
-#define AUZAAR_ARDUINO_H
+#ifndef TOOLS_ARDUINO_H
+#define TOOLS_ARDUINO_H
 
-// auzaar (Arduino edition) — the small subset that fits in board memory.
+// tools (Arduino edition) — the small subset that fits in board memory.
 //
 // Boards like the Uno have only a couple of KB of RAM, so the lodash-style
 // collection tools are left out. The wow compiler reports a friendly Roman Urdu
 // error if you use a collection tool, a list, or `pucho` on the Arduino target.
-// What remains here: bol (print over Serial), the math helpers, and a small
+// What remains here: likho (print over Serial), the math helpers, and a small
 // String builder for interpolation. `intezar` maps straight to delay().
 
 #include <Arduino.h>
 
-// ---- bol: print a value. Whole numbers print without a trailing ".00". ----
+// ---- likho: print a value. Whole numbers print without a trailing ".00". ----
 static inline void wow_print(double v) {
     if (v == (long)v) Serial.println((long)v);
     else              Serial.println(v);
@@ -46,7 +46,7 @@ static inline double wow_random_number(double lo, double hi) {
 // ---- ESP32 WiFi + WebServer ----
 // These helpers are only compiled when building for an ESP32 board.
 // arduino-cli picks the right board automatically when you set board_fqbn.
-#if defined(AUZAAR_ESP32) || defined(ESP32)
+#if defined(WOW_ESP32) || defined(ESP32)
 #include <WiFi.h>
 #include <WebServer.h>
 
@@ -76,6 +76,6 @@ inline void wow_jawab_bhejo(double code, const String& content_type, const Strin
 inline String wow_wifi_ip() {
     return WiFi.localIP().toString();
 }
-#endif // AUZAAR_ESP32 / ESP32
+#endif // WOW_ESP32 / ESP32
 
-#endif // AUZAAR_ARDUINO_H
+#endif // TOOLS_ARDUINO_H

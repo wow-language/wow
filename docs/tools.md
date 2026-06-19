@@ -1,7 +1,7 @@
-# auzaar — the wow built-in toolbox
+# tools — the wow built-in toolbox
 
-`auzaar` is wow's standard utility library, inspired by lodash. It is auto-loaded
-in every wow program. You never write `lao auzaar`. These functions are simply
+`tools` is wow's standard utility library, inspired by lodash. It is auto-loaded
+in every wow program. You never write `lao tools`. These functions are simply
 always available.
 
 ## Naming rule
@@ -85,13 +85,13 @@ targets. On Arduino, objects are not supported (board memory is too tight).
 ```
 shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
 
-bol mafta(shaks)           # → ["naam", "umar", "shahar"]
-bol qeemtain(shaks)        # → ["Ahmad", 14, "Karachi"]
-bol key_hai(shaks, "naam") # → sahi
-bol key_hai(shaks, "adres")# → ghalat
+likho mafta(shaks)           # → ["naam", "umar", "shahar"]
+likho qeemtain(shaks)        # → ["Ahmad", 14, "Karachi"]
+likho key_hai(shaks, "naam") # → sahi
+likho key_hai(shaks, "adres")# → ghalat
 
 naya = hata(shaks, "umar")
-bol mafta(naya)            # → ["naam", "shahar"]
+likho mafta(naya)            # → ["naam", "shahar"]
 ```
 
 ## Math

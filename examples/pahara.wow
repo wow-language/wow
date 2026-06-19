@@ -3,10 +3,10 @@
 #       ya:  wow run pahara.wow --target node
 
 banao pahara(number) {
-    bol "{number} ka pahara:"
+    likho "{number} ka pahara:"
     1 se 10 tak har i {
         natija = number * i
-        bol "{number} x {i} = {natija}"
+        likho "{number} x {i} = {natija}"
     }
 }
 

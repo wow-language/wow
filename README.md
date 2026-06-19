@@ -40,7 +40,7 @@ wow --help
 
 ```wow
 banao salam(naam = "dost") {
-    bol "Salam {naam}! Kaise ho?"
+    likho "Salam {naam}! Kaise ho?"
 }
 
 numbers = [1, 5, 3, 8, 2, 9]
@@ -48,7 +48,7 @@ numbers = [1, 5, 3, 8, 2, 9]
 bade = numbers phir chuno(x > 4) phir tarteeb
 
 har bade mein n {
-    bol "mila: {n}"
+    likho "mila: {n}"
 }
 
 salam("Ahmad")
@@ -78,7 +78,7 @@ Salam Ahmad! Kaise ho?
 
 | wow | What it does |
 |---|---|
-| `bol "..."` | print |
+| `likho "..."` | print |
 | `agar x > 5 { }` | if |
 | `warna { }` | else |
 | `0 se 10 tak har i { }` | numeric for loop |
@@ -113,7 +113,7 @@ nateeja = numbers
 
 ---
 
-## Built-in toolbox: `auzaar`
+## Built-in toolbox: `tools`
 
 Auto-loaded everywhere, no import needed.
 
@@ -222,9 +222,9 @@ or `(req, res)` to write. `banao shuru()` holds code that runs at startup.
 ```wow
 koshish {
     natija = 10 / 0
-    bol natija
+    likho natija
 } pakro ghalti {
-    bol "Ghalti pakdi: {ghalti}"
+    likho "Ghalti pakdi: {ghalti}"
 }
 ```
 
@@ -289,16 +289,16 @@ lines of Roman Urdu into a running Express server.
 
 What works today:
 
-- Variables, `bol`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
+- Variables, `likho`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
 - `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
 - Loops: `0 se 10 tak har i`, `har list mein item`, `N baar`, `jabtak`, with `roko` / `aage`
 - `banao` / `bhejo` functions with default parameters and recursion
-- Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
+- Lists, `pucho` (input), and the **full `tools` toolbox** on C and Node
   (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
 - `koshish` / `pakro` error handling on C and Node (e.g. catching divide-by-zero)
 - **Arduino**: `banao shuru()` / `banao chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
-  `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
+  `intezar`, and the math `tools` helpers — the memory-heavy parts (lists,
   collection tools, `pucho`) give a friendly "Arduino par nahi" error
 - **Web (Node)**: `lao` imports, `rasta` routes, `jawab` replies, and `server(port)`
   — a real Express server with no boilerplate
@@ -310,10 +310,10 @@ What works today:
 ```wow
 shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
 
-bol shaks.naam            # Ahmad   — regular access (crashes if khali)
-bol shaks ka umar         # 14      — safe: ka / ki / kay all work
-bol shaks ki shahar       # Karachi — pick whichever sounds right for the noun
-bol shaks ka email        # khali   — missing key, no crash
+likho shaks.naam            # Ahmad   — regular access (crashes if khali)
+likho shaks ka umar         # 14      — safe: ka / ki / kay all work
+likho shaks ki shahar       # Karachi — pick whichever sounds right for the noun
+likho shaks ka email        # khali   — missing key, no crash
 
 shaks.umar = 15           # update a property
 shaks.email ?= "default"  # only assign if currently khali
@@ -324,11 +324,11 @@ log = [
     { naam: "Sara", umar: 12 },
 ]
 har log mein p {
-    bol "{p.naam}: {p ka umar} saal"
+    likho "{p.naam}: {p ka umar} saal"
 }
 ```
 
-Object auzaar: `mafta(obj)` (keys), `qeemtain(obj)` (values), `key_hai(obj, key)`, `hata(obj, key)`.
+Object tools: `mafta(obj)` (keys), `qeemtain(obj)` (values), `key_hai(obj, key)`, `hata(obj, key)`.
 Objects are available on C and Node targets; Arduino gives a helpful "memory kam hai" error.
 
 A couple of design notes for the curious:
@@ -339,7 +339,7 @@ A couple of design notes for the curious:
 - The parser is hand-written (not a combinator library) so the Roman Urdu error
   messages stay precise; see the note in `Cargo.toml`.
 
-See [docs/keywords.md](docs/keywords.md) for the full keyword reference and [docs/auzaar.md](docs/auzaar.md) for the toolbox reference.
+See [docs/keywords.md](docs/keywords.md) for the full keyword reference and [docs/tools.md](docs/tools.md) for the toolbox reference.
 
 ---
 

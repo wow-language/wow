@@ -24,11 +24,11 @@ const BANNER: &str = concat!(
     "  \x1b[2mCode likho. Wow bolo.\x1b[0m  \x1b[33m(و)\x1b[0m\n",
 );
 
-/// The runtimes + auzaar toolbox, baked into the compiler. We write the right
+/// The runtimes + tools toolbox, baked into the compiler. We write the right
 /// one next to every generated file so a wow program runs with no external setup.
-const AUZAAR_H: &str = include_str!("../runtime/auzaar/auzaar.h");
-const AUZAAR_JS: &str = include_str!("../runtime/auzaar/auzaar.js");
-const AUZAAR_ARDUINO_H: &str = include_str!("../runtime/auzaar/auzaar_arduino.h");
+const TOOLS_H: &str = include_str!("../runtime/tools/tools.h");
+const TOOLS_JS: &str = include_str!("../runtime/tools/tools.js");
+const TOOLS_ARDUINO_H: &str = include_str!("../runtime/tools/tools_arduino.h");
 
 /// wow — Roman Urdu programming language
 #[derive(Parser)]
@@ -171,11 +171,11 @@ fn compile(file: &PathBuf, target: &Target, run: bool) {
         process::exit(1);
     });
 
-    // Write the auzaar runtime next to the output so it runs with no setup.
+    // Write the tools runtime next to the output so it runs with no setup.
     match target {
-        Target::C => write_runtime(&out_path, "auzaar.h", AUZAAR_H),
-        Target::Node => write_runtime(&out_path, "auzaar.js", AUZAAR_JS),
-        Target::Arduino => write_runtime(&out_path, "auzaar_arduino.h", AUZAAR_ARDUINO_H),
+        Target::C => write_runtime(&out_path, "tools.h", TOOLS_H),
+        Target::Node => write_runtime(&out_path, "tools.js", TOOLS_JS),
+        Target::Arduino => write_runtime(&out_path, "tools_arduino.h", TOOLS_ARDUINO_H),
     }
 
     if std::io::stdout().is_terminal() {
@@ -189,7 +189,7 @@ fn compile(file: &PathBuf, target: &Target, run: bool) {
     }
 }
 
-/// Write a bundled runtime file (auzaar.h / auzaar.js) next to the output.
+/// Write a bundled runtime file (tools.h / tools.js) next to the output.
 fn write_runtime(out_path: &PathBuf, name: &str, contents: &str) {
     let runtime = out_path.with_file_name(name);
     fs::write(&runtime, contents).unwrap_or_else(|_| {

@@ -15,13 +15,13 @@ examples/package.json
 examples/package-lock.json
 
 # wow compiler output — generated next to .wow source files when building examples.
-# The real runtime sources live in runtime/auzaar/ and are NOT ignored.
+# The real runtime sources live in runtime/tools/ and are NOT ignored.
 examples/*.c
 examples/*.js
 examples/*.ino
-examples/auzaar.h
-examples/auzaar.js
-examples/auzaar_arduino.h
+examples/tools.h
+examples/tools.js
+examples/tools_arduino.h
 # compiled example binaries (no extension)
 examples/salam
 examples/blink

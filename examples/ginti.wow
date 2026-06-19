@@ -5,6 +5,6 @@ counter = 0
 
 banao chalao() {
     counter = counter + 1
-    bol "Ginti: {counter}"
+    likho "Ginti: {counter}"
     intezar(500)
 }

@@ -10,8 +10,8 @@ banao ghar() {
 
 banao shuru() {
     wifi_jodo(SSID, PASSWORD)
-    bol("Jud gaya! IP:")
-    bol(wifi_ip())
+    likho("Jud gaya! IP:")
+    likho(wifi_ip())
     server_rasta("/", ghar)
     server_shuru(80)
 }

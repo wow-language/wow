@@ -61,7 +61,7 @@ fn walk(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>) {
         Node::Program(stmts) => walk_all(stmts, target, errors),
 
         Node::Assign { value, .. } => walk(value, target, errors),
-        Node::Bol(e)
+        Node::Likho(e)
         | Node::Bhejo(e)
         | Node::Jawab(e)
         | Node::Pucho(e)
@@ -220,9 +220,9 @@ fn check_node(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>
             ),
             Node::Call { name, .. } if is_collection_tool(name) => flag(
                 errors, span,
-                "Arduino par ye auzaar nahi",
-                "collection/string auzaar board ki memory mein nahi aate",
-                "Arduino par sirf math wale auzaar (round, power, ...) chalte hain",
+                "Arduino par ye tools nahi",
+                "collection/string tools board ki memory mein nahi aate",
+                "Arduino par sirf math wale tools (round, power, ...) chalte hain",
             ),
             Node::Pucho(_) => flag(
                 errors, span,
@@ -284,7 +284,7 @@ fn is_arduino_call(name: &str) -> bool {
     )
 }
 
-/// auzaar tools too heavy for a microcontroller (everything except the math
+/// tools too heavy for a microcontroller (everything except the math
 /// helpers, which the Arduino runtime does provide).
 fn is_collection_tool(name: &str) -> bool {
     matches!(
