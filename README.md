@@ -47,7 +47,7 @@ numbers = [1, 5, 3, 8, 2, 9]
 
 bade = numbers phir chuno(x > 4) phir tarteeb
 
-har n mein bade {
+har bade mein n {
     bol "mila: {n}"
 }
 
@@ -81,8 +81,8 @@ Salam Ahmad! Kaise ho?
 | `bol "..."` | print |
 | `agar x > 5 { }` | if |
 | `warna { }` | else |
-| `har i 0 se 10 tak { }` | numeric for loop |
-| `har item mein lista { }` | list for loop |
+| `0 se 10 tak har i { }` | numeric for loop |
+| `har lista mein item { }` | list for loop |
 | `3 baar { }` | repeat N times |
 | `jabtak x < 10 { }` | while |
 | `banao naam(params) { }` | define a function |
@@ -291,7 +291,7 @@ What works today:
 
 - Variables, `bol`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
 - `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
-- Loops: `har i 0 se 10 tak`, `har item mein list`, `N baar`, `jabtak`, with `roko` / `aage`
+- Loops: `0 se 10 tak har i`, `har list mein item`, `N baar`, `jabtak`, with `roko` / `aage`
 - `banao` / `bhejo` functions with default parameters and recursion
 - Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
   (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
@@ -323,7 +323,7 @@ log = [
     { naam: "Ahmad", umar: 10 },
     { naam: "Sara", umar: 12 },
 ]
-har p mein log {
+har log mein p {
     bol "{p.naam}: {p ka umar} saal"
 }
 ```
@@ -333,7 +333,7 @@ Objects are available on C and Node targets; Arduino gives a helpful "memory kam
 
 A couple of design notes for the curious:
 
-- Ranges are **inclusive**: `har i 1 se 5 tak` runs for 1, 2, 3, 4, 5.
+- Ranges are **inclusive**: `1 se 5 tak har i` runs for 1, 2, 3, 4, 5.
 - Inside string interpolation, a `{...}` hole can hold any expression, but not a
   string literal using the same quotes — write `umar = "{saal}"` ahead of time.
 - The parser is hand-written (not a combinator library) so the Roman Urdu error

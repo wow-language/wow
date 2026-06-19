@@ -26,7 +26,7 @@ log = [
     { naam: "Ahmad", umar: 10 },
     { naam: "Sara", umar: 12 },
 ]
-har p mein log {
+har log mein p {
     bol "{p.naam}: {p ka umar} saal"
 }
 

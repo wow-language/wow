@@ -4,7 +4,7 @@
 
 banao pahara(number) {
     bol "{number} ka pahara:"
-    har i 1 se 10 tak {
+    1 se 10 tak har i {
         natija = number * i
         bol "{number} x {i} = {natija}"
     }
