@@ -137,7 +137,7 @@ fn gen_stmt(node: &Spanned<Node>, depth: usize) -> String {
     let pad = "    ".repeat(depth);
     match &node.node {
         Node::Assign { name, value } => format!("{pad}v_{name} = {};\n", gen_expr(value)),
-        Node::Bol(e) => format!("{pad}wow_print({});\n", gen_expr(e)),
+        Node::Likho(e) => format!("{pad}wow_print({});\n", gen_expr(e)),
         Node::Bhejo(e) => format!("{pad}return {};\n", gen_expr(e)),
         Node::Roko => format!("{pad}break;\n"),
         Node::Aage => format!("{pad}continue;\n"),
@@ -419,7 +419,7 @@ fn collect_assigns(node: &Spanned<Node>, names: &mut BTreeSet<String>) {
 
 fn uses_bol_in(node: &Spanned<Node>) -> bool {
     match &node.node {
-        Node::Bol(_) => true,
+        Node::Likho(_) => true,
         Node::ArduinoShuru(body) | Node::ArduinoChalao(body) | Node::Banao { body, .. } => {
             body.iter().any(uses_bol_in)
         }

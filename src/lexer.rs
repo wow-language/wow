@@ -10,7 +10,7 @@ pub enum Token {
     // ----------------------------------------------------------------
     // Keywords — core
     // ----------------------------------------------------------------
-    #[token("bol")]     Bol,
+    #[token("likho")]   Likho,
     #[token("rakho")]   Rakho,
     #[token("agar")]    Agar,
     #[token("warna")]   Warna,

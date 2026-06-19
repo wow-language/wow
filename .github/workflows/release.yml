@@ -8,6 +8,15 @@ on:
 permissions:
   contents: write
 
+# Make cargo's crate downloads resilient to flaky CI networking. The
+# "[16] Error in the HTTP2 framing layer" failures on the macOS runners come
+# from curl's HTTP/2 multiplexing; turning it off (and bumping retries) makes
+# the registry fetch fall back to plain HTTP/1.1 and retry on transient drops.
+env:
+  CARGO_NET_RETRY: "10"
+  CARGO_HTTP_MULTIPLEXING: "false"
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+
 jobs:
   build:
     name: Build ${{ matrix.name }}

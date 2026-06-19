@@ -38,8 +38,8 @@ pub enum Node {
         value: Box<Spanned<Node>>,
     },
 
-    /// bol expr
-    Bol(Box<Spanned<Node>>),
+    /// likho expr
+    Likho(Box<Spanned<Node>>),
 
     /// pucho "..."  — returns what the user typed
     Pucho(Box<Spanned<Node>>),

@@ -3,23 +3,23 @@
 
 shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
 
-bol "Salam {shaks.naam}!"
-bol "Umar: {shaks ka umar}"
+likho "Salam {shaks.naam}!"
+likho "Umar: {shaks ka umar}"
 
 shaks.umar = 15
-bol "Agla saal: {shaks.umar}"
+likho "Agla saal: {shaks.umar}"
 
 # Safe access — khali agar key nahi
-bol shaks ka email
+likho shaks ka email
 
 # Null-coalescing assign
 shaks.email ?= "ahmad@example.com"
-bol shaks.email
+likho shaks.email
 
 # Nested objects
 shaks.adres = { shahar: "Karachi", gali: "Model Town" }
-bol shaks.adres.shahar
-bol shaks ka adres ka gali
+likho shaks.adres.shahar
+likho shaks ka adres ka gali
 
 # List of objects
 log = [
@@ -27,11 +27,11 @@ log = [
     { naam: "Sara", umar: 12 },
 ]
 har log mein p {
-    bol "{p.naam}: {p ka umar} saal"
+    likho "{p.naam}: {p ka umar} saal"
 }
 
 # Object auzaar
-bol mafta(shaks)
-bol qeemtain(shaks)
-bol key_hai(shaks, "naam")
-bol key_hai(shaks, "password")
+likho mafta(shaks)
+likho qeemtain(shaks)
+likho key_hai(shaks, "naam")
+likho key_hai(shaks, "password")

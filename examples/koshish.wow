@@ -5,11 +5,11 @@ banao mehfooz_taqseem(a, b) {
     koshish {
         bhejo a / b
     } pakro ghalti {
-        bol "Ghalti pakdi: {ghalti}"
+        likho "Ghalti pakdi: {ghalti}"
         bhejo khali
     }
 }
 
-bol "10 / 2 = {mehfooz_taqseem(10, 2)}"
-bol "10 / 0 = {mehfooz_taqseem(10, 0)}"
-bol "Program theek se khatam hua."
+likho "10 / 2 = {mehfooz_taqseem(10, 2)}"
+likho "10 / 0 = {mehfooz_taqseem(10, 0)}"
+likho "Program theek se khatam hua."

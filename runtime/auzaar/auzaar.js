@@ -22,8 +22,8 @@ const fmt = (v) => {
     return String(v);
 };
 
-// bol — print a value
-const bol = (v) => { console.log(fmt(v)); };
+// likho — print a value
+const likho = (v) => { console.log(fmt(v)); };
 
 // pucho — print a prompt and read one line from stdin (synchronously)
 const pucho = (prompt) => {
@@ -167,7 +167,7 @@ const absolute      = (n) => Math.abs(n);
 
 module.exports = {
     // runtime core
-    fmt, bol, pucho, truthy, intezar, taqseem, baaqi,
+    fmt, likho, pucho, truthy, intezar, taqseem, baaqi,
     // collections
     badlo, chuno, joro, dhundo, shamil, ginti, jama, max, min,
     tarteeb, ulta, alag, flatten, tukre, pehla, aakhri, phento,

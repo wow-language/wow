@@ -3,13 +3,13 @@
 
 naam = pucho "Apna naam likho: "
 
-bol "Salam {naam}! wow mein khush aamdeed."
+likho "Salam {naam}! wow mein khush aamdeed."
 
 numbers = [1, 5, 3, 8, 2, 9]
 
 bade = numbers phir chuno(x > 4) phir tarteeb
 
-bol "4 se bade numbers:"
+likho "4 se bade numbers:"
 har bade mein n {
-    bol "  {n}"
+    likho "  {n}"
 }

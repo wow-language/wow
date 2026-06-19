@@ -61,7 +61,7 @@ fn walk(node: &Spanned<Node>, target: &Target, errors: &mut Vec<Violation>) {
         Node::Program(stmts) => walk_all(stmts, target, errors),
 
         Node::Assign { value, .. } => walk(value, target, errors),
-        Node::Bol(e)
+        Node::Likho(e)
         | Node::Bhejo(e)
         | Node::Jawab(e)
         | Node::Pucho(e)

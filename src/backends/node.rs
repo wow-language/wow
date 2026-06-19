@@ -96,7 +96,7 @@ fn gen_node(node: &Spanned<Node>, depth: usize) -> String {
             format!("{pad}{}.{} = {};\n", gen_expr(object), prop, gen_expr(value))
         }
 
-        Node::Bol(e) => format!("{pad}console.log(fmt({}));\n", gen_expr(e)),
+        Node::Likho(e) => format!("{pad}console.log(fmt({}));\n", gen_expr(e)),
         Node::Bhejo(e) => format!("{pad}return {};\n", gen_expr(e)),
         Node::Roko => format!("{pad}break;\n"),
         Node::Aage => format!("{pad}continue;\n"),

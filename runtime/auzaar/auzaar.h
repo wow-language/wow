@@ -300,7 +300,7 @@ static WowValue wow_to_str(WowValue v) {
  * Output and input
  * ================================================================ */
 
-/* bol — print a value and a newline */
+/* likho — print a value and a newline */
 static WowValue wow_print(WowValue v) {
     WowValue s = wow_to_str(v);
     printf("%s\n", s.as.str);

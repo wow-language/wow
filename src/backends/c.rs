@@ -147,7 +147,7 @@ impl CGen {
                     self.gen_expr(value)
                 )
             }
-            Node::Bol(e) => format!("{pad}wow_print({});\n", self.gen_expr(e)),
+            Node::Likho(e) => format!("{pad}wow_print({});\n", self.gen_expr(e)),
             // Returning/breaking out of a koshish body must unwind the handler
             // stack first; _hbase is the function's level, the loop var the loop's.
             Node::Bhejo(e) => {

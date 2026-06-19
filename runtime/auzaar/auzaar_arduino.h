@@ -6,12 +6,12 @@
 // Boards like the Uno have only a couple of KB of RAM, so the lodash-style
 // collection tools are left out. The wow compiler reports a friendly Roman Urdu
 // error if you use a collection tool, a list, or `pucho` on the Arduino target.
-// What remains here: bol (print over Serial), the math helpers, and a small
+// What remains here: likho (print over Serial), the math helpers, and a small
 // String builder for interpolation. `intezar` maps straight to delay().
 
 #include <Arduino.h>
 
-// ---- bol: print a value. Whole numbers print without a trailing ".00". ----
+// ---- likho: print a value. Whole numbers print without a trailing ".00". ----
 static inline void wow_print(double v) {
     if (v == (long)v) Serial.println((long)v);
     else              Serial.println(v);

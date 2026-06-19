@@ -162,7 +162,7 @@ impl Parser {
             &Token::LBrace,
             "'{' chahiye",
             "yahan block shuru karne ke liye '{' likhein",
-            Some("misaal: agar x > 5 { bol \"bara\" }"),
+            Some("misaal: agar x > 5 { likho \"bara\" }"),
         );
         self.skip_newlines();
         let mut stmts = Vec::new();
@@ -192,11 +192,11 @@ impl Parser {
     fn statement(&mut self) -> Spanned<Node> {
         let start = self.cur_span().start;
         match self.peek() {
-            Some(Token::Bol) => {
+            Some(Token::Likho) => {
                 self.advance();
                 let e = self.expr();
                 let span = start..e.span.end;
-                Spanned::new(Node::Bol(Box::new(e)), span)
+                Spanned::new(Node::Likho(Box::new(e)), span)
             }
             Some(Token::Rakho) => {
                 self.advance();
@@ -975,7 +975,7 @@ impl Parser {
 /// Keywords a beginner might misspell. Short ones (se/ya) are left out — too
 /// many ordinary names sit one edit away from them.
 const SUGGESTABLE_KEYWORDS: &[&str] = &[
-    "bol", "rakho", "agar", "warna", "har", "mein", "tak", "baar", "jabtak",
+    "likho", "rakho", "agar", "warna", "har", "mein", "tak", "baar", "jabtak",
     "roko", "aage", "banao", "bhejo", "sahi", "ghalat", "khali", "aur", "nahi", "lao",
     "phir", "koshish", "pakro", "pucho", "shuru", "chalao", "intezar",
 ];

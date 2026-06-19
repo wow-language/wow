@@ -40,7 +40,7 @@ wow --help
 
 ```wow
 banao salam(naam = "dost") {
-    bol "Salam {naam}! Kaise ho?"
+    likho "Salam {naam}! Kaise ho?"
 }
 
 numbers = [1, 5, 3, 8, 2, 9]
@@ -48,7 +48,7 @@ numbers = [1, 5, 3, 8, 2, 9]
 bade = numbers phir chuno(x > 4) phir tarteeb
 
 har bade mein n {
-    bol "mila: {n}"
+    likho "mila: {n}"
 }
 
 salam("Ahmad")
@@ -78,7 +78,7 @@ Salam Ahmad! Kaise ho?
 
 | wow | What it does |
 |---|---|
-| `bol "..."` | print |
+| `likho "..."` | print |
 | `agar x > 5 { }` | if |
 | `warna { }` | else |
 | `0 se 10 tak har i { }` | numeric for loop |
@@ -222,9 +222,9 @@ or `(req, res)` to write. `banao shuru()` holds code that runs at startup.
 ```wow
 koshish {
     natija = 10 / 0
-    bol natija
+    likho natija
 } pakro ghalti {
-    bol "Ghalti pakdi: {ghalti}"
+    likho "Ghalti pakdi: {ghalti}"
 }
 ```
 
@@ -289,7 +289,7 @@ lines of Roman Urdu into a running Express server.
 
 What works today:
 
-- Variables, `bol`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
+- Variables, `likho`, string interpolation, math, comparisons, `aur` / `ya` / `nahi`
 - `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
 - Loops: `0 se 10 tak har i`, `har list mein item`, `N baar`, `jabtak`, with `roko` / `aage`
 - `banao` / `bhejo` functions with default parameters and recursion
@@ -310,10 +310,10 @@ What works today:
 ```wow
 shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
 
-bol shaks.naam            # Ahmad   — regular access (crashes if khali)
-bol shaks ka umar         # 14      — safe: ka / ki / kay all work
-bol shaks ki shahar       # Karachi — pick whichever sounds right for the noun
-bol shaks ka email        # khali   — missing key, no crash
+likho shaks.naam            # Ahmad   — regular access (crashes if khali)
+likho shaks ka umar         # 14      — safe: ka / ki / kay all work
+likho shaks ki shahar       # Karachi — pick whichever sounds right for the noun
+likho shaks ka email        # khali   — missing key, no crash
 
 shaks.umar = 15           # update a property
 shaks.email ?= "default"  # only assign if currently khali
@@ -324,7 +324,7 @@ log = [
     { naam: "Sara", umar: 12 },
 ]
 har log mein p {
-    bol "{p.naam}: {p ka umar} saal"
+    likho "{p.naam}: {p ka umar} saal"
 }
 ```
 

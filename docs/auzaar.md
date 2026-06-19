@@ -85,13 +85,13 @@ targets. On Arduino, objects are not supported (board memory is too tight).
 ```
 shaks = { naam: "Ahmad", umar: 14, shahar: "Karachi" }
 
-bol mafta(shaks)           # → ["naam", "umar", "shahar"]
-bol qeemtain(shaks)        # → ["Ahmad", 14, "Karachi"]
-bol key_hai(shaks, "naam") # → sahi
-bol key_hai(shaks, "adres")# → ghalat
+likho mafta(shaks)           # → ["naam", "umar", "shahar"]
+likho qeemtain(shaks)        # → ["Ahmad", 14, "Karachi"]
+likho key_hai(shaks, "naam") # → sahi
+likho key_hai(shaks, "adres")# → ghalat
 
 naya = hata(shaks, "umar")
-bol mafta(naya)            # → ["naam", "shahar"]
+likho mafta(naya)            # → ["naam", "shahar"]
 ```
 
 ## Math
