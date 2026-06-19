@@ -30,7 +30,7 @@ har log mein p {
     likho "{p.naam}: {p ka umar} saal"
 }
 
-# Object auzaar
+# Object tools
 likho mafta(shaks)
 likho qeemtain(shaks)
 likho key_hai(shaks, "naam")

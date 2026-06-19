@@ -1,7 +1,7 @@
-# auzaar — the wow built-in toolbox
+# tools — the wow built-in toolbox
 
-`auzaar` is wow's standard utility library, inspired by lodash. It is auto-loaded
-in every wow program. You never write `lao auzaar`. These functions are simply
+`tools` is wow's standard utility library, inspired by lodash. It is auto-loaded
+in every wow program. You never write `lao tools`. These functions are simply
 always available.
 
 ## Naming rule

@@ -113,7 +113,7 @@ nateeja = numbers
 
 ---
 
-## Built-in toolbox: `auzaar`
+## Built-in toolbox: `tools`
 
 Auto-loaded everywhere, no import needed.
 
@@ -293,12 +293,12 @@ What works today:
 - `agar` / `warna agar` / `warna`, the word-ternary (`"bara" agar x > 5 warna "chota"`)
 - Loops: `0 se 10 tak har i`, `har list mein item`, `N baar`, `jabtak`, with `roko` / `aage`
 - `banao` / `bhejo` functions with default parameters and recursion
-- Lists, `pucho` (input), and the **full `auzaar` toolbox** on C and Node
+- Lists, `pucho` (input), and the **full `tools` toolbox** on C and Node
   (incl. `joro`/reduce, `guroh`/groupBy, `phento`/shuffle)
 - `phir` pipelines, including higher-order tools (`numbers phir chuno(x > 4) phir tarteeb`)
 - `koshish` / `pakro` error handling on C and Node (e.g. catching divide-by-zero)
 - **Arduino**: `banao shuru()` / `banao chalao()`, `pin_set` / `pin_likho` / `pin_parho`,
-  `intezar`, and the math `auzaar` helpers — the memory-heavy parts (lists,
+  `intezar`, and the math `tools` helpers — the memory-heavy parts (lists,
   collection tools, `pucho`) give a friendly "Arduino par nahi" error
 - **Web (Node)**: `lao` imports, `rasta` routes, `jawab` replies, and `server(port)`
   — a real Express server with no boilerplate
@@ -328,7 +328,7 @@ har log mein p {
 }
 ```
 
-Object auzaar: `mafta(obj)` (keys), `qeemtain(obj)` (values), `key_hai(obj, key)`, `hata(obj, key)`.
+Object tools: `mafta(obj)` (keys), `qeemtain(obj)` (values), `key_hai(obj, key)`, `hata(obj, key)`.
 Objects are available on C and Node targets; Arduino gives a helpful "memory kam hai" error.
 
 A couple of design notes for the curious:
@@ -339,7 +339,7 @@ A couple of design notes for the curious:
 - The parser is hand-written (not a combinator library) so the Roman Urdu error
   messages stay precise; see the note in `Cargo.toml`.
 
-See [docs/keywords.md](docs/keywords.md) for the full keyword reference and [docs/auzaar.md](docs/auzaar.md) for the toolbox reference.
+See [docs/keywords.md](docs/keywords.md) for the full keyword reference and [docs/tools.md](docs/tools.md) for the toolbox reference.
 
 ---
 

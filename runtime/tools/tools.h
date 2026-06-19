@@ -1,4 +1,4 @@
-/* auzaar.h — the wow runtime + standard toolbox, C edition.
+/* tools.h — the wow runtime + standard toolbox, C edition.
  *
  * This single header is written next to every .c file the wow compiler emits
  * and is #included by it. It is header-only (everything is `static`) so a wow
@@ -9,14 +9,14 @@
  * Two jobs:
  *   1. The runtime — a dynamically typed value (`WowValue`) so a kid can write
  *      `x = 5` then `x = "salam"` and have it work, even though C is static.
- *   2. auzaar — the built-in toolbox (math, strings, collections), auto-loaded.
+ *   2. tools — the built-in toolbox (math, strings, collections), auto-loaded.
  *
  * Memory: this Phase-1 runtime never frees. wow programs for beginners are
  * short-lived, so leaking is a fine trade for simplicity. A later phase can add
  * reference counting or an arena.
  */
-#ifndef AUZAAR_H
-#define AUZAAR_H
+#ifndef TOOLS_H
+#define TOOLS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -402,7 +402,7 @@ static WowValue wow_at(WowValue list, int i) {
 }
 
 /* ================================================================
- * auzaar — sleep (shared keyword `intezar`)
+ * tools — sleep (shared keyword `intezar`)
  * ================================================================ */
 
 static WowValue wow_intezar(WowValue ms) {
@@ -415,7 +415,7 @@ static WowValue wow_intezar(WowValue ms) {
 }
 
 /* ================================================================
- * auzaar — math (kids meet these names in math class)
+ * tools — math (kids meet these names in math class)
  * ================================================================ */
 
 static WowValue wow_round(WowValue n)       { return wow_num(round(wow_as_num(n))); }
@@ -433,7 +433,7 @@ static WowValue wow_random_number(WowValue lo, WowValue hi) {
 }
 
 /* ================================================================
- * auzaar — strings
+ * tools — strings
  * ================================================================ */
 
 static WowValue wow_lambai(WowValue s)      { return wow_num(strlen(wow_to_str(s).as.str)); }
@@ -495,7 +495,7 @@ static WowValue wow_tabdeel(WowValue text, WowValue old, WowValue naya) {
 }
 
 /* ================================================================
- * auzaar — collections (return new lists; never mutate the input)
+ * tools — collections (return new lists; never mutate the input)
  * ================================================================ */
 
 static WowValue wow_ginti(WowValue list)  { return wow_num(wow_count(list)); }
@@ -664,7 +664,7 @@ static WowValue wow_guroh(WowValue list, WowValue (*fn)(WowValue)) {
 }
 
 /* ================================================================
- * auzaar — objects
+ * tools — objects
  * ================================================================ */
 
 /* mafta — list of keys */
@@ -703,4 +703,4 @@ static WowValue wow_hata(WowValue obj, WowValue key) {
     return out;
 }
 
-#endif /* AUZAAR_H */
+#endif /* TOOLS_H */

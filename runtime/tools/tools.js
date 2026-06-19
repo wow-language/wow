@@ -1,4 +1,4 @@
-// auzaar.js — the wow standard toolbox, Node.js edition
+// tools.js — the wow standard toolbox, Node.js edition
 // Auto-required by every .js file the wow compiler emits.
 // Full implementation: the Node target gets the complete toolbox.
 
